@@ -13,9 +13,9 @@ export interface UserProfile {
   tiktokLink: string;
   youtubeLink: string;
   otherPlatformLink: string;
-  contentSpecialty: string;
+  contentSpecialties: string[];    // Q1 복수선택
   contentSpecialtyEtc: string;
-  strongestPoint: string;
+  strongestPoints: string[];       // Q2 복수선택
   strongestPointEtc: string;
   shootFormats: string[];
   equipment: string;
