@@ -94,6 +94,7 @@ interface CampaignContextType {
   deleteCampaign: (id: number) => void;
   toggleFeatured: (id: number) => void;
   applyToCampaign: (userId: string, campaignId: number) => void;
+  cancelCampaign: (userId: string, campaignId: number) => void;
   getAppliedCampaigns: (userId: string) => CampaignOffer[];
   isApplied: (userId: string, campaignId: number) => boolean;
 }
@@ -118,6 +119,13 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
       const current = prev[userId] ?? [];
       if (current.includes(campaignId)) return prev;
       return { ...prev, [userId]: [...current, campaignId] };
+    });
+  };
+
+  const cancelCampaign = (userId: string, campaignId: number) => {
+    setAppliedMap((prev) => {
+      const current = prev[userId] ?? [];
+      return { ...prev, [userId]: current.filter((id) => id !== campaignId) };
     });
   };
 
@@ -151,7 +159,7 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
     <CampaignContext.Provider value={{
       campaigns, setCampaigns,
       addCampaign, updateCampaign, deleteCampaign, toggleFeatured,
-      applyToCampaign, getAppliedCampaigns, isApplied,
+      applyToCampaign, cancelCampaign, getAppliedCampaigns, isApplied,
     }}>
       {children}
     </CampaignContext.Provider>
