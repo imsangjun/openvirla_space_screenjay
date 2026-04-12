@@ -97,6 +97,10 @@ interface CampaignContextType {
   cancelCampaign: (userId: string, campaignId: number) => void;
   getAppliedCampaigns: (userId: string) => CampaignOffer[];
   isApplied: (userId: string, campaignId: number) => boolean;
+  /** campaignId → 해당 캠페인에 지원한 userId 배열 */
+  getApplicantsByCampaign: (campaignId: number) => string[];
+  /** userId → 해당 유저가 지원한 campaignId 배열 */
+  appliedMap: Record<string, number[]>;
 }
 
 const CampaignContext = createContext<CampaignContextType | null>(null);
@@ -155,11 +159,18 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
     setCampaigns((prev) => prev.map((c) => (c.id === id ? { ...c, featured: !c.featured } : c)));
   };
 
+  const getApplicantsByCampaign = (campaignId: number): string[] => {
+    return Object.entries(appliedMap)
+      .filter(([, ids]) => ids.includes(campaignId))
+      .map(([userId]) => userId);
+  };
+
   return (
     <CampaignContext.Provider value={{
       campaigns, setCampaigns,
       addCampaign, updateCampaign, deleteCampaign, toggleFeatured,
       applyToCampaign, cancelCampaign, getAppliedCampaigns, isApplied,
+      getApplicantsByCampaign, appliedMap,
     }}>
       {children}
     </CampaignContext.Provider>
