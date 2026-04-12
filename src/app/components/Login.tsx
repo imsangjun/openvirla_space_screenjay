@@ -302,7 +302,10 @@ export function Login() {
                     <div>
                       <label className={labelCls}>Confirm Password *</label>
                       <input type="password" value={signupData.confirmPassword} onChange={e => setSignupData({...signupData, confirmPassword: e.target.value})}
-                        required className={inputCls} placeholder="Re-enter password" />
+                        required className={`${inputCls} ${signupData.confirmPassword && signupData.password !== signupData.confirmPassword ? "border-orange-400 focus:ring-orange-400" : ""}`} placeholder="Re-enter password" />
+                      {signupData.confirmPassword && signupData.password !== signupData.confirmPassword && (
+                        <p className="mt-1.5 text-xs font-medium text-orange-500">Passwords do not match.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -476,7 +479,10 @@ export function Login() {
                 <div>
                   <label className={labelCls}>Confirm New Password</label>
                   <input type="password" value={confirmNewPw} onChange={e => setConfirmNewPw(e.target.value)}
-                    required className={inputCls} placeholder="Re-enter new password" />
+                    required className={`${inputCls} ${confirmNewPw && newPassword !== confirmNewPw ? "border-orange-400 focus:ring-orange-400" : ""}`} placeholder="Re-enter new password" />
+                  {confirmNewPw && newPassword !== confirmNewPw && (
+                    <p className="mt-1.5 text-xs font-medium text-orange-500">Passwords do not match.</p>
+                  )}
                 </div>
                 {submitBtn("Reset Password", submitting)}
               </form>
