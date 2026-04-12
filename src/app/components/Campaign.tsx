@@ -4,12 +4,24 @@ import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { useCampaigns, CampaignOffer } from "../context/CampaignContext";
+import type { UserProfile } from "../context/AuthContext";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogFooter, DialogDescription,
 } from "./ui/dialog";
 
 const handshakeIcon = "/handshake.png";
+
+// Creator Profile 완성 여부 체크
+function isProfileComplete(profile?: UserProfile): boolean {
+  if (!profile) return false;
+  return !!(
+    profile.contentSpecialty &&
+    profile.strongestPoint &&
+    profile.shootFormats?.length > 0 &&
+    profile.equipment
+  );
+}
 
 const PlatformIcon = ({ platform }: { platform: string }) => {
   const iconClass = "w-3.5 h-3.5";
@@ -36,6 +48,7 @@ export function Campaign() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
   const [isLoginPromptOpen, setIsLoginPromptOpen] = useState(false);
+  const [isProfilePromptOpen, setIsProfilePromptOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPlatform, setSelectedPlatform] = useState("All");
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -65,8 +78,14 @@ export function Campaign() {
 
   const handleApply = () => {
     setIsDialogOpen(false);
+    // 1순위: 로그인 여부
     if (!user) {
       setIsLoginPromptOpen(true);
+      return;
+    }
+    // 2순위: Creator Profile 완성 여부
+    if (!isProfileComplete(user.profile)) {
+      setIsProfilePromptOpen(true);
       return;
     }
     if (selectedCampaign) {
@@ -88,12 +107,12 @@ export function Campaign() {
     return true;
   });
 
-  const btnBase = "px-3 py-1.5 rounded-lg text-sm font-medium transition-all";
-  const btnActive = `${btnBase} bg-[#004DF6] text-white shadow-[2px_2px_8px_rgba(0,77,246,0.3),-2px_-2px_8px_rgba(128,167,251,0.3)]`;
-  const btnInactive = `${btnBase} bg-white/60 text-gray-700 border border-gray-200 hover:bg-white/80 hover:border-[#004DF6]/30 shadow-[inset_2px_2px_6px_rgba(0,0,0,0.08),inset_-2px_-2px_6px_rgba(255,255,255,0.9),2px_2px_4px_rgba(0,0,0,0.06),-2px_-2px_4px_rgba(255,255,255,0.5)]`;
+  const btnActive   = "px-3 py-1.5 rounded-lg text-sm font-medium transition-all bg-[#004DF6] text-white shadow-[2px_2px_8px_rgba(0,77,246,0.3),-2px_-2px_8px_rgba(128,167,251,0.3)]";
+  const btnInactive = "px-3 py-1.5 rounded-lg text-sm font-medium transition-all bg-white/60 text-gray-700 border border-gray-200 hover:bg-white/80 hover:border-[#004DF6]/30 shadow-[inset_2px_2px_6px_rgba(0,0,0,0.08),inset_-2px_-2px_6px_rgba(255,255,255,0.9),2px_2px_4px_rgba(0,0,0,0.06),-2px_-2px_4px_rgba(255,255,255,0.5)]";
 
   return (
     <div className="bg-white min-h-screen">
+
       {/* Header */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -326,6 +345,37 @@ export function Campaign() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Profile Incomplete Dialog */}
+      <Dialog open={isProfilePromptOpen} onOpenChange={setIsProfilePromptOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle className="sr-only">Profile Incomplete</DialogTitle><DialogDescription className="sr-only">Complete your creator profile</DialogDescription></DialogHeader>
+          <div className="flex flex-col items-center justify-center text-center py-8 px-4">
+            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mb-6">
+              <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Complete Your Profile First</h2>
+            <p className="text-sm text-gray-600 mb-8">
+              Please complete your Creator Profile before applying to campaigns. Brands need to know your content style and capabilities.
+            </p>
+            <button
+              onClick={() => { setIsProfilePromptOpen(false); navigate("/mypage?section=creator-profile"); }}
+              className="w-full mb-3 px-8 py-3 bg-[#004DF6] rounded-xl text-white font-medium hover:bg-[#0041cc] transition-all"
+            >
+              Complete Creator Profile
+            </button>
+            <button
+              onClick={() => setIsProfilePromptOpen(false)}
+              className="w-full px-8 py-3 bg-gray-100 rounded-xl text-gray-700 font-medium hover:bg-gray-200 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
