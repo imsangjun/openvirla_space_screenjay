@@ -34,7 +34,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   loginWithEmail: (email: string, password: string) => Promise<void>;
-  signupWithEmail: (username: string, email: string, password: string) => Promise<void>;
+  signupWithEmail: (username: string, email: string, password: string, profile?: UserProfile) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   loginWithFacebook: () => Promise<void>;
   logout: () => Promise<void>;
@@ -104,15 +104,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signupWithEmail = async (username: string, email: string, password: string) => {
+  const signupWithEmail = async (username: string, email: string, password: string, profile?: UserProfile) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { data: { full_name: username, user_name: username } },
       });
       if (error) throw new Error(error.message);
+      // 회원가입 직후 profile을 localStorage에 미리 저장
+      if (profile && data.user) {
+        saveExtra(data.user.id, { profile });
+      }
     } finally {
       setIsLoading(false);
     }
