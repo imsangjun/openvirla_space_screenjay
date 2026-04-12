@@ -34,8 +34,8 @@ const emptyProfile = (): UserProfile => ({
   fullName: "", phoneNumber: "", telegramId: "", birthYear: "",
   nationality: "", countryLocation: "", instagramLink: "",
   tiktokLink: "", youtubeLink: "", otherPlatformLink: "",
-  contentSpecialty: "", contentSpecialtyEtc: "",
-  strongestPoint: "", strongestPointEtc: "",
+  contentSpecialties: [], contentSpecialtyEtc: "",
+  strongestPoints: [], strongestPointEtc: "",
   shootFormats: [], equipment: "",
 });
 
@@ -109,6 +109,34 @@ export function MyPage() {
         ? prev.shootFormats.filter((f) => f !== format)
         : [...prev.shootFormats, format],
     }));
+  };
+
+  const toggleContentSpecialty = (option: string) => {
+    setForm((prev) => {
+      const current = prev.contentSpecialties ?? [];
+      const next = current.includes(option)
+        ? current.filter((v) => v !== option)
+        : [...current, option];
+      return {
+        ...prev,
+        contentSpecialties: next,
+        contentSpecialtyEtc: !next.includes("etc") ? "" : prev.contentSpecialtyEtc,
+      };
+    });
+  };
+
+  const toggleStrongestPoint = (option: string) => {
+    setForm((prev) => {
+      const current = prev.strongestPoints ?? [];
+      const next = current.includes(option)
+        ? current.filter((v) => v !== option)
+        : [...current, option];
+      return {
+        ...prev,
+        strongestPoints: next,
+        strongestPointEtc: !next.includes("etc") ? "" : prev.strongestPointEtc,
+      };
+    });
   };
 
   const menuItems: { id: Section; label: string; icon: React.ReactNode; danger?: boolean }[] = [
@@ -326,24 +354,33 @@ export function MyPage() {
                     <label className="block text-sm font-semibold text-gray-800 mb-1">
                       Q1. What type of content do you specialize in?
                     </label>
-                    <p className="text-xs text-gray-400 mb-3">Select one that best describes your content</p>
+                    <p className="text-xs text-gray-400 mb-3">Select all that apply</p>
                     <div className="flex flex-wrap gap-2">
-                      {CONTENT_SPECIALTIES.map((option) => (
-                        <button
-                          key={option}
-                          type="button"
-                          onClick={() => setForm({ ...form, contentSpecialty: option, contentSpecialtyEtc: option !== "etc" ? "" : form.contentSpecialtyEtc })}
-                          className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
-                            form.contentSpecialty === option
-                              ? "bg-[#004DF6] text-white border-[#004DF6] shadow-[0_4px_12px_rgba(0,77,246,0.25)]"
-                              : "bg-gray-50 text-gray-600 border-gray-200 hover:border-[#004DF6]/40 hover:bg-[#f0f4ff]"
-                          }`}
-                        >
-                          {option === "etc" ? "Other" : option}
-                        </button>
-                      ))}
+                      {CONTENT_SPECIALTIES.map((option) => {
+                        const selected = (form.contentSpecialties ?? []).includes(option);
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => toggleContentSpecialty(option)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
+                              selected
+                                ? "bg-[#004DF6] text-white border-[#004DF6] shadow-[0_4px_12px_rgba(0,77,246,0.25)]"
+                                : "bg-gray-50 text-gray-600 border-gray-200 hover:border-[#004DF6]/40 hover:bg-[#f0f4ff]"
+                            }`}
+                          >
+                            {selected && <Check className="w-3.5 h-3.5" />}
+                            {option === "etc" ? "Other" : option}
+                          </button>
+                        );
+                      })}
                     </div>
-                    {form.contentSpecialty === "etc" && (
+                    {(form.contentSpecialties ?? []).length > 0 && (
+                      <p className="text-xs text-[#004DF6] mt-2 font-medium">
+                        {(form.contentSpecialties ?? []).length} selected
+                      </p>
+                    )}
+                    {(form.contentSpecialties ?? []).includes("etc") && (
                       <input
                         type="text"
                         value={form.contentSpecialtyEtc}
@@ -361,24 +398,33 @@ export function MyPage() {
                     <label className="block text-sm font-semibold text-gray-800 mb-1">
                       Q2. What is your strongest point as a creator?
                     </label>
-                    <p className="text-xs text-gray-400 mb-3">Select one that best represents your strength</p>
+                    <p className="text-xs text-gray-400 mb-3">Select all that apply</p>
                     <div className="flex flex-wrap gap-2">
-                      {STRONGEST_POINTS.map((option) => (
-                        <button
-                          key={option}
-                          type="button"
-                          onClick={() => setForm({ ...form, strongestPoint: option, strongestPointEtc: option !== "etc" ? "" : form.strongestPointEtc })}
-                          className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
-                            form.strongestPoint === option
-                              ? "bg-[#004DF6] text-white border-[#004DF6] shadow-[0_4px_12px_rgba(0,77,246,0.25)]"
-                              : "bg-gray-50 text-gray-600 border-gray-200 hover:border-[#004DF6]/40 hover:bg-[#f0f4ff]"
-                          }`}
-                        >
-                          {option === "etc" ? "Other" : option}
-                        </button>
-                      ))}
+                      {STRONGEST_POINTS.map((option) => {
+                        const selected = (form.strongestPoints ?? []).includes(option);
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => toggleStrongestPoint(option)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
+                              selected
+                                ? "bg-[#004DF6] text-white border-[#004DF6] shadow-[0_4px_12px_rgba(0,77,246,0.25)]"
+                                : "bg-gray-50 text-gray-600 border-gray-200 hover:border-[#004DF6]/40 hover:bg-[#f0f4ff]"
+                            }`}
+                          >
+                            {selected && <Check className="w-3.5 h-3.5" />}
+                            {option === "etc" ? "Other" : option}
+                          </button>
+                        );
+                      })}
                     </div>
-                    {form.strongestPoint === "etc" && (
+                    {(form.strongestPoints ?? []).length > 0 && (
+                      <p className="text-xs text-[#004DF6] mt-2 font-medium">
+                        {(form.strongestPoints ?? []).length} selected
+                      </p>
+                    )}
+                    {(form.strongestPoints ?? []).includes("etc") && (
                       <input
                         type="text"
                         value={form.strongestPointEtc}
