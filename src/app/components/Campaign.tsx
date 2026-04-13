@@ -12,7 +12,6 @@ import {
 
 const handshakeIcon = "/handshake.png";
 
-// Creator Profile 완성 여부 체크
 function isProfileComplete(profile?: UserProfile): boolean {
   if (!profile) return false;
   return !!(
@@ -81,12 +80,10 @@ export function Campaign() {
   };
 
   const handleApply = async () => {
-    // dialog 닫기 전에 먼저 캡처
     const campaign = selectedCampaign;
     if (!user) { setIsDialogOpen(false); setIsLoginPromptOpen(true); return; }
     if (!isProfileComplete(user.profile)) { setIsDialogOpen(false); setIsProfilePromptOpen(true); return; }
     if (!campaign) return;
-
     setIsDialogOpen(false);
     try {
       await applyToCampaign(user.id, campaign.id);
@@ -94,7 +91,6 @@ export function Campaign() {
       setIsSuccessDialogOpen(true);
     } catch (err) {
       console.error("Apply failed:", err);
-      // 이미 지원한 경우 등 에러 시에도 성공 팝업 대신 아무것도 안 함
     }
   };
 
@@ -127,7 +123,8 @@ export function Campaign() {
         </div>
       </section>
 
-      {(authLoading || campaignsLoading) ? (
+      {/* 로딩 skeleton */}
+      {(authLoading || campaignsLoading) && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -135,128 +132,133 @@ export function Campaign() {
             ))}
           </div>
         </div>
-      ) : (
-      <>
-      {/* Featured */}
-      {featuredCampaigns.length > 0 && (
-        <section className="py-10 mb-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-gradient-to-br from-[#f0f4ff] to-[#e6f0ff] rounded-3xl p-8 shadow-[4px_4px_12px_rgba(0,77,246,0.12),-4px_-4px_12px_rgba(255,255,255,0.9),inset_-4px_-4px_16px_rgba(0,77,246,0.15),inset_4px_4px_16px_rgba(255,255,255,1)]">
-              <h2 className="text-4xl font-bold text-gray-900 flex items-center gap-2 mb-6">
-                <span className="inline-block w-2 h-2 bg-[#004DF6] rounded-full animate-pulse" />
-                Featured & Urgent Campaigns
-              </h2>
-              <div ref={scrollRef} className="relative overflow-x-auto scrollbar-custom pb-6 pt-2 px-2">
-                <div className="flex gap-6 animate-scroll-left">
-                  {[...Array(3)].map((_, setIndex) =>
-                    featuredCampaigns.map((offer) => (
-                      <div key={`scroll-${setIndex}-${offer.id}`} onClick={() => handleCardClick(offer)}
-                        className="flex-shrink-0 w-[320px] bg-white/60 backdrop-blur-lg rounded-md border border-white/80 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/80 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
-                        <div className="relative h-40 rounded-t-md overflow-hidden">
-                          <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                          <div className="absolute top-2 left-2 flex gap-1.5">
-                            {offer.platforms.map((p) => (
-                              <div key={p} className="w-6 h-6 bg-white/20 backdrop-blur-md rounded flex items-center justify-center text-white border border-white/30 shadow-lg">
-                                <PlatformIcon platform={p} />
-                              </div>
-                            ))}
-                          </div>
-                          <div className="absolute top-2 right-2">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-lg">{offer.type}</span>
-                          </div>
-                        </div>
-                        <div className="p-3">
-                          <div className="flex items-center gap-1 text-xs text-orange-600 mb-2">
-                            <Clock className="w-3 h-3" />
-                            <span className="font-semibold">{offer.daysLeft} {offer.daysLeft === 1 ? "day" : "days"} left</span>
-                          </div>
-                          <div className="text-xs text-gray-500 mb-0.5">{offer.company}</div>
-                          <h3 className="text-sm font-bold text-gray-900 mb-2 line-clamp-2">{offer.title}</h3>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       )}
 
-      {/* All Campaigns */}
-      <section className="py-12 mt-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">All Campaigns<span className="text-[#004DF6]">.</span></h2>
-
-          {/* Filters */}
-          <div className="space-y-4 mb-6">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Category</span>
-              <div className="flex gap-2">
-                {categories.map((c) => (
-                  <button key={c} onClick={() => setSelectedCategory(c)} className={selectedCategory === c ? btnActive : btnInactive}>{c}</button>
-                ))}
+      {/* 로딩 완료 후 콘텐츠 */}
+      {!authLoading && !campaignsLoading && (
+        <>
+          {/* Featured */}
+          {featuredCampaigns.length > 0 && (
+            <section className="py-10 mb-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-gradient-to-br from-[#f0f4ff] to-[#e6f0ff] rounded-3xl p-8 shadow-[4px_4px_12px_rgba(0,77,246,0.12),-4px_-4px_12px_rgba(255,255,255,0.9),inset_-4px_-4px_16px_rgba(0,77,246,0.15),inset_4px_4px_16px_rgba(255,255,255,1)]">
+                  <h2 className="text-4xl font-bold text-gray-900 flex items-center gap-2 mb-6">
+                    <span className="inline-block w-2 h-2 bg-[#004DF6] rounded-full animate-pulse" />
+                    Featured & Urgent Campaigns
+                  </h2>
+                  <div ref={scrollRef} className="relative overflow-x-auto scrollbar-custom pb-6 pt-2 px-2">
+                    <div className="flex gap-6 animate-scroll-left">
+                      {[...Array(3)].map((_, setIndex) =>
+                        featuredCampaigns.map((offer) => (
+                          <div key={`scroll-${setIndex}-${offer.id}`} onClick={() => handleCardClick(offer)}
+                            className="flex-shrink-0 w-[320px] bg-white/60 backdrop-blur-lg rounded-md border border-white/80 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/80 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
+                            <div className="relative h-40 rounded-t-md overflow-hidden">
+                              <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                              <div className="absolute top-2 left-2 flex gap-1.5">
+                                {offer.platforms.map((p) => (
+                                  <div key={p} className="w-6 h-6 bg-white/20 backdrop-blur-md rounded flex items-center justify-center text-white border border-white/30 shadow-lg">
+                                    <PlatformIcon platform={p} />
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="absolute top-2 right-2">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-lg">{offer.type}</span>
+                              </div>
+                            </div>
+                            <div className="p-3">
+                              <div className="flex items-center gap-1 text-xs text-orange-600 mb-2">
+                                <Clock className="w-3 h-3" />
+                                <span className="font-semibold">{offer.daysLeft} {offer.daysLeft === 1 ? "day" : "days"} left</span>
+                              </div>
+                              <div className="text-xs text-gray-500 mb-0.5">{offer.company}</div>
+                              <h3 className="text-sm font-bold text-gray-900 mb-2 line-clamp-2">{offer.title}</h3>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Platform</span>
-              <div className="flex gap-2">
-                {platforms.map((p) => (
-                  <button key={p} onClick={() => setSelectedPlatform(p)} className={selectedPlatform === p ? btnActive : btnInactive}>{p}</button>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Search</span>
-              <input type="text" placeholder="Search by title, company, or description..."
-                value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}
-                className="flex-1 max-w-md px-4 py-2 rounded-lg border border-gray-200 bg-white/60 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#004DF6] focus:ring-2 focus:ring-[#004DF6]/20 transition-all shadow-[inset_3px_3px_8px_rgba(0,0,0,0.12),inset_-3px_-3px_8px_rgba(255,255,255,0.9),2px_2px_6px_rgba(0,0,0,0.08),-2px_-2px_6px_rgba(255,255,255,0.5)]" />
-            </div>
-          </div>
+            </section>
+          )}
 
-          {/* Grid */}
-          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredCampaigns.map((offer) => (
-              <div key={offer.id} onClick={() => handleCardClick(offer)}
-                className="bg-white/40 backdrop-blur-lg rounded-md border border-white/60 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/60 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
-                <div className="relative h-40 rounded-t-md overflow-hidden">
-                  <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                  <div className="absolute top-2 left-2 flex gap-1.5">
-                    {offer.platforms.map((p) => (
-                      <div key={p} className="w-6 h-6 bg-white/20 backdrop-blur-md rounded flex items-center justify-center text-white border border-white/30 shadow-lg">
-                        <PlatformIcon platform={p} />
-                      </div>
+          {/* All Campaigns */}
+          <section className="py-12 mt-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">All Campaigns<span className="text-[#004DF6]">.</span></h2>
+
+              {/* Filters */}
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Category</span>
+                  <div className="flex gap-2">
+                    {categories.map((c) => (
+                      <button key={c} onClick={() => setSelectedCategory(c)} className={selectedCategory === c ? btnActive : btnInactive}>{c}</button>
                     ))}
                   </div>
-                  <div className="absolute top-2 right-2">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-lg">{offer.type}</span>
-                  </div>
-                  {offer.featured && (
-                    <div className="absolute bottom-2 left-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold bg-[#004DF6]/80 backdrop-blur-md text-white shadow-lg">⚡ Featured</span>
-                    </div>
-                  )}
                 </div>
-                <div className="p-3">
-                  <div className="flex items-center gap-1 text-xs text-[#004DF6] mb-2">
-                    <Clock className="w-3 h-3" />
-                    <span className="font-medium">{offer.daysLeft} {offer.daysLeft === 1 ? "day" : "days"} left</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Platform</span>
+                  <div className="flex gap-2">
+                    {platforms.map((p) => (
+                      <button key={p} onClick={() => setSelectedPlatform(p)} className={selectedPlatform === p ? btnActive : btnInactive}>{p}</button>
+                    ))}
                   </div>
-                  <div className="text-xs text-gray-500 mb-0.5">{offer.company}</div>
-                  <h3 className="text-sm font-bold text-gray-900 mb-2 line-clamp-2">{offer.title}</h3>
-                  {user && isApplied(user.id, offer.id) && (
-                    <span className="inline-flex items-center gap-1 text-xs text-green-600 font-semibold">
-                      <CheckCircle className="w-3 h-3" /> Applied
-                    </span>
-                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Search</span>
+                  <input type="text" placeholder="Search by title, company, or description..."
+                    value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}
+                    className="flex-1 max-w-md px-4 py-2 rounded-lg border border-gray-200 bg-white/60 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#004DF6] focus:ring-2 focus:ring-[#004DF6]/20 transition-all shadow-[inset_3px_3px_8px_rgba(0,0,0,0.12),inset_-3px_-3px_8px_rgba(255,255,255,0.9),2px_2px_6px_rgba(0,0,0,0.08),-2px_-2px_6px_rgba(255,255,255,0.5)]" />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
+              {/* Grid */}
+              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {filteredCampaigns.map((offer) => (
+                  <div key={offer.id} onClick={() => handleCardClick(offer)}
+                    className="bg-white/40 backdrop-blur-lg rounded-md border border-white/60 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/60 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
+                    <div className="relative h-40 rounded-t-md overflow-hidden">
+                      <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      <div className="absolute top-2 left-2 flex gap-1.5">
+                        {offer.platforms.map((p) => (
+                          <div key={p} className="w-6 h-6 bg-white/20 backdrop-blur-md rounded flex items-center justify-center text-white border border-white/30 shadow-lg">
+                            <PlatformIcon platform={p} />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="absolute top-2 right-2">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-lg">{offer.type}</span>
+                      </div>
+                      {offer.featured && (
+                        <div className="absolute bottom-2 left-2">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold bg-[#004DF6]/80 backdrop-blur-md text-white shadow-lg">⚡ Featured</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <div className="flex items-center gap-1 text-xs text-[#004DF6] mb-2">
+                        <Clock className="w-3 h-3" />
+                        <span className="font-medium">{offer.daysLeft} {offer.daysLeft === 1 ? "day" : "days"} left</span>
+                      </div>
+                      <div className="text-xs text-gray-500 mb-0.5">{offer.company}</div>
+                      <h3 className="text-sm font-bold text-gray-900 mb-2 line-clamp-2">{offer.title}</h3>
+                      {user && isApplied(user.id, offer.id) && (
+                        <span className="inline-flex items-center gap-1 text-xs text-green-600 font-semibold">
+                          <CheckCircle className="w-3 h-3" /> Applied
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       {/* Campaign Detail Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -390,8 +392,6 @@ export function Campaign() {
         </DialogContent>
       </Dialog>
 
-      </>
-      )}
     </div>
   );
 }
