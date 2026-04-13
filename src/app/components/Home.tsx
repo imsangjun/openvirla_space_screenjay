@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 
 export function Home() {
@@ -23,44 +23,32 @@ export function Home() {
     <div className="bg-white">
       {/* Typography-Centered Hero Section */}
       <section className="relative min-h-screen overflow-hidden bg-white flex items-stretch justify-center pt-20 pb-0">
-        {/* Background Typography Pattern - Animated Right to Left */}
-        <div className="absolute inset-0 overflow-hidden opacity-[0.08] select-none pointer-events-none">
-          <div className="flex gap-8 animate-scroll-rtl">
-            <div className="flex flex-col gap-0 text-gray-900 font-black uppercase leading-none tracking-tighter whitespace-nowrap flex-shrink-0">
-              <div className="text-[12vw]">VIRAL MARKETING</div>
-              <div className="text-[12vw] flex gap-16">OPEN VIRAL<span>OPEN VIRAL</span></div>
-              <div className="text-[12vw]">COLLABORATION CAMPAIGNS</div>
-              <div className="text-[12vw] flex gap-16">CREATORS<span>CREATORS</span></div>
-              <div className="text-[12vw] flex gap-16">INFLUENCERS<span>INFLUENCERS</span></div>
-              <div className="text-[12vw] flex gap-16">OPEN VIRAL<span>OPEN VIRAL</span></div>
-              <div className="text-[12vw]">USER GENERATED CONTENT</div>
-              <div className="text-[12vw] flex gap-16">CREATORS<span>CREATORS</span></div>
-              <div className="text-[12vw]">GROWTH</div>
-              <div className="text-[12vw]">VIRAL MARKETING</div>
-              <div className="text-[12vw] flex gap-16">OPEN VIRAL<span>OPEN VIRAL</span></div>
-              <div className="text-[12vw]">COLLABORATION CAMPAIGNS</div>
-              <div className="text-[12vw] flex gap-16">CREATORS<span>CREATORS</span></div>
-              <div className="text-[12vw] flex gap-16">INFLUENCERS<span>INFLUENCERS</span></div>
-              <div className="text-[12vw]">GROWTH</div>
+        {/* Background Typography Pattern */}
+        <div className="absolute inset-0 opacity-[0.08] select-none pointer-events-none flex flex-col justify-around" style={{ overflow: "clip" }}>
+          {[
+            { text: "VIRAL MARKETING", rtl: true },
+            { text: "OPEN VIRAL", rtl: false },
+            { text: "COLLABORATION CAMPAIGNS", rtl: true },
+            { text: "CREATORS", rtl: false },
+            { text: "INFLUENCERS", rtl: true },
+            { text: "OPEN VIRAL", rtl: false },
+            { text: "USER GENERATED CONTENT", rtl: true },
+            { text: "CREATORS", rtl: false },
+            { text: "GROWTH", rtl: true },
+          ].map(({ text, rtl }, i) => (
+            <div key={i}>
+              <div className={rtl ? "animate-scroll-rtl" : "animate-scroll-ltr"}>
+                {Array.from({ length: 8 }).map((_, j) => (
+                  <span
+                    key={j}
+                    className="text-[12vw] font-black uppercase leading-none tracking-tighter whitespace-nowrap text-gray-900 flex-shrink-0"
+                  >
+                    {text}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-col gap-0 text-gray-900 font-black uppercase leading-none tracking-tighter whitespace-nowrap flex-shrink-0">
-              <div className="text-[12vw]">VIRAL MARKETING</div>
-              <div className="text-[12vw] flex gap-16">OPEN VIRAL<span>OPEN VIRAL</span></div>
-              <div className="text-[12vw]">COLLABORATION CAMPAIGNS</div>
-              <div className="text-[12vw] flex gap-16">CREATORS<span>CREATORS</span></div>
-              <div className="text-[12vw] flex gap-16">INFLUENCERS<span>INFLUENCERS</span></div>
-              <div className="text-[12vw] flex gap-16">OPEN VIRAL<span>OPEN VIRAL</span></div>
-              <div className="text-[12vw]">USER GENERATED CONTENT</div>
-              <div className="text-[12vw] flex gap-16">CREATORS<span>CREATORS</span></div>
-              <div className="text-[12vw]">GROWTH</div>
-              <div className="text-[12vw]">VIRAL MARKETING</div>
-              <div className="text-[12vw] flex gap-16">OPEN VIRAL<span>OPEN VIRAL</span></div>
-              <div className="text-[12vw]">COLLABORATION CAMPAIGNS</div>
-              <div className="text-[12vw] flex gap-16">CREATORS<span>CREATORS</span></div>
-              <div className="text-[12vw] flex gap-16">INFLUENCERS<span>INFLUENCERS</span></div>
-              <div className="text-[12vw]">GROWTH</div>
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Main Content */}
@@ -68,66 +56,69 @@ export function Home() {
           <div className="flex justify-between items-stretch gap-6 flex-1">
             {/* Left Side */}
             <div className="flex-shrink-0 flex flex-col justify-between pb-0">
-              <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-tight tracking-[-0.02em]">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-gray-900">Create</span>
-                  <span className="text-[#004DF6]">Content.</span>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-gray-900">Earn</span>
-                  <span className="text-[#004DF6]">Money.</span>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-gray-900">Go</span>
-                  <span className="text-[#004DF6]">Viral.</span>
-                </div>
-              </div>
-
-              {/* OpenViral + is 그룹 */}
               <div>
-                {/* OpenViral brand + is */}
-                <div className="flex items-baseline gap-2 leading-none mb-0">
-                  <span className="font-black tracking-[-0.03em]" style={{fontSize: '2.4rem', lineHeight: 1}}>
-                    <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Viral</span>
-                  </span>
-                  <span className="text-xl font-bold text-[#004DF6]">is</span>
+                <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-tight tracking-[-0.02em] divide-y-2 divide-black">
+                  <div className="flex items-baseline gap-1">
+                    <span className="inline-block text-gray-900 py-2 font-bold">Create</span>
+                    <span className="inline-block bg-[#004DF6] text-white px-1.5 border-[3px] border-black font-semibold whitespace-nowrap border-t-[0px] border-r-[0px] border-b-[0px] border-l-[0px]">Content.</span>
+                  </div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="inline-block text-gray-900 py-2 font-bold">Earn</span>
+                    <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Money.</span>
+                  </div>
+                  <div className="flex items-baseline gap-1 border-b-2 border-black">
+                    <span className="inline-block text-gray-900 py-2 font-bold">Go</span>
+                    <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
+                  </div>
                 </div>
 
-                {/* Secondary Text - moved here, blue */}
-                <div>
-                  <p className="text-base text-[#004DF6] leading-relaxed max-w-xs">
-                    A next-generation marketplace where creators meet opportunities.{" "}
-                    Browse campaigns, collaborate with brands you love, and get paid for your creativity.
-                  </p>
-                </div>
-                {/* Character Image */}
-                <div className="mt-4">
+                {/* OpenSpace is + 텍스트 + 이미지 */}
+                <div className="flex flex-row items-center gap-4 pt-1 mt-0">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-baseline gap-2 leading-none">
+                      <span className="font-black tracking-[-0.03em]" style={{fontSize: '2.4rem', lineHeight: 1}}>
+                        <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Viral</span>
+                      </span>
+                      <span className="text-xl font-bold text-[#000000]">is...</span>
+                    </div>
+                    <p className="text-base leading-relaxed max-w-xs text-[#000000]">
+                      A next-generation marketplace where creators meet opportunities.{" "}
+                      Browse campaigns, collaborate with brands you love, and get paid for your creativity.
+                    </p>
+                  </div>
                   <img
-                    src="/characters.png"
-                    alt="OpenViral Creators"
-                    className="w-full max-w-sm object-contain object-bottom block"
+                    src="/handshake.png"
+                    alt="Handshake"
+                    className="w-52 h-52 object-contain flex-shrink-0"
                   />
                 </div>
               </div>
+
+              {/* Character Image */}
+              <div className="relative mt-4 pt-36">
+                <img
+                  src="/characters.png"
+                  alt="OpenViral Creators"
+                  className="absolute bottom-0 left-0 w-[480px] object-contain object-bottom pointer-events-none select-none"
+                  style={{ zIndex: 0 }}
+                />
+              </div>
             </div>
 
-            {/* Right Side - Main Content */}
-            <div className="flex-1 text-right mt-12 md:mt-20 lg:mt-24 pb-12" style={{maxWidth: '520px'}}>
-              {/* Main Typography Message */}
-              <h1 className="text-[clamp(1.6rem,3.5vw,3.2rem)] font-black leading-[0.95] mb-12 text-[#004DF6] uppercase tracking-tight">
-                OpenViral is a platform connecting influencers <span className="whitespace-nowrap">with global brands,</span> creating authentic content that drives engagement.
+            {/* Right Side */}
+            <div className="flex-1 text-right mt-4 md:mt-6 lg:mt-8 pb-12" style={{maxWidth: '520px'}}>
+              <h1 className="text-[clamp(1.6rem,3.5vw,3.2rem)] font-black leading-[1.15] mb-12 text-[#004DF6] uppercase tracking-tight">
+                OpenViral is a platform connecting <span className="inline bg-[#004DF6] text-white px-1">influencers</span><br />with<br /><span className="inline bg-[#004DF6] text-white px-1">global brands,</span> creating authentic content that drives engagement.
               </h1>
 
-              {/* Decorative Element */}
               <div className="flex items-center justify-end gap-4 mb-16">
                 <div className="text-[#004DF6] font-black text-6xl">[ * ]</div>
               </div>
 
-              {/* CTA Buttons */}
               <div className="flex flex-wrap gap-4 justify-end">
                 <button
                   onClick={handleBrowseCampaign}
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-lg text-white bg-[#004DF6] hover:bg-[#0041cc] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
+                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-lg text-white bg-[#004DF6] border-4 border-black hover:bg-[#0041cc] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
                 >
                   Browse Campaigns
                 </button>
@@ -142,6 +133,7 @@ export function Home() {
           </div>
         </div>
       </section>
+
       {/* Stats Section */}
       <section className="bg-[#004DF6] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -165,6 +157,7 @@ export function Home() {
           </div>
         </div>
       </section>
+
       {/* Services Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -204,6 +197,7 @@ export function Home() {
           </div>
         </div>
       </section>
+
       {/* CTA Section */}
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -219,7 +213,8 @@ export function Home() {
           </button>
         </div>
       </section>
-      {/* Large Typography Footer Section */}
+
+      {/* Footer Section */}
       <section className="relative bg-black text-white py-20 overflow-hidden min-h-[60vh] flex items-center justify-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex justify-between items-start mb-8">
