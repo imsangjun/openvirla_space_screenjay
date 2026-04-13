@@ -22,6 +22,7 @@ export function Home() {
   };
 
   const [videoUrls, setVideoUrls] = useState<string[]>([]);
+  const [videoErrors, setVideoErrors] = useState<Set<number>>(new Set());
   const [videoLoading, setVideoLoading] = useState(true);
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -30,9 +31,34 @@ export function Home() {
   const animRef = useRef<number>(0);
   const speedRef = useRef(0.4); // px per frame
   const offsetRef = useRef(0);
+  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const CARD_W = 280; // 9:16 비율 카드 너비
   const GAP = 16;
   const ITEM_W = CARD_W + GAP;
+
+  // 비디오 재생 시도 함수
+  const tryPlayVideo = (video: HTMLVideoElement) => {
+    if (video.paused) {
+      video.play().catch((err) => {
+        // Autoplay 실패 시 muted 상태 확인 후 재시도
+        console.warn("Video autoplay failed, retrying muted:", err);
+        video.muted = true;
+        video.play().catch((e) => console.error("Video play failed:", e));
+      });
+    }
+  };
+
+  // 비디오 에러 핸들러
+  const handleVideoError = (index: number, url: string) => {
+    console.error(`Video load error at index ${index}:`, url);
+    setVideoErrors((prev) => new Set(prev).add(index));
+  };
+
+  // 비디오 로드 성공 핸들러
+  const handleVideoLoaded = (index: number, video: HTMLVideoElement) => {
+    videoRefs.current.set(index, video);
+    tryPlayVideo(video);
+  };
 
   useEffect(() => {
     supabase.from("showcase_videos")
@@ -271,10 +297,11 @@ export function Home() {
                 const viewCenter = offset + (typeof window !== "undefined" ? window.innerWidth / 2 : 700);
                 const dist = Math.abs(cardCenter - viewCenter);
                 const isActive = dist < 200;
+                const hasError = videoErrors.has(i);
                 return (
                   <div
                     key={i}
-                    className="flex-shrink-0 rounded-2xl overflow-hidden transition-all duration-300"
+                    className="flex-shrink-0 rounded-2xl overflow-hidden transition-all duration-300 bg-gray-900"
                     style={{
                       width: "280px",
                       height: "497px", // 9:16
@@ -283,14 +310,24 @@ export function Home() {
                       transform: isActive ? "scale(1.04)" : "scale(0.96)",
                     }}
                   >
-                    <video
-                      src={url}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="w-full h-full object-cover pointer-events-none"
-                    />
+                    {hasError ? (
+                      <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
+                        <span>영상을 불러올 수 없습니다</span>
+                      </div>
+                    ) : (
+                      <video
+                        src={url}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-cover pointer-events-none"
+                        onError={() => handleVideoError(i, url)}
+                        onLoadedData={(e) => handleVideoLoaded(i, e.currentTarget)}
+                        onCanPlay={(e) => tryPlayVideo(e.currentTarget)}
+                      />
+                    )}
                   </div>
                 );
               })}
