@@ -159,28 +159,41 @@ function AdminDashboard() {
 
   // stats
   const [totalApplications, setTotalApplications] = useState(0);
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
 
   const featuredCount = campaigns.filter((c) => c.featured).length;
   const isEditing = editingId !== null || isAdding;
   const displayCampaigns = campaignTab === "featured" ? campaigns.filter((c) => c.featured) : campaigns;
 
-  // 전체 applications 수 로드
+  // 어드민 진입 시 즉시 stats + users + applicants 모두 로드
   useEffect(() => {
+    // 1. 전체 applications 수
     supabase.from("applications").select("id", { count: "exact", head: true })
       .then(({ count }) => setTotalApplications(count ?? 0));
+
+    // 2. 전체 유저 수 (profiles 테이블 count)
+    supabase.from("profiles").select("id", { count: "exact", head: true })
+      .then(({ count }) => setTotalUsers(count ?? 0));
+
+    // 3. 전체 유저 목록 즉시 로드
+    loadAllUsers();
   }, []);
 
-  // applicants 탭 진입 시 각 캠페인별 지원자 수 로드
+  // applicants 탭 진입 시 각 캠페인별 실제 지원자 수 로드
   useEffect(() => {
     if (mainTab !== "applicants") return;
     campaigns.forEach(async (c) => {
       if (campaignApplicants[c.id] !== undefined) return;
       const ids = await getApplicantsByCampaign(c.id);
       setCampaignApplicants((prev) => ({ ...prev, [c.id]: ids }));
+      // current_applicants와 실제 수가 다르면 DB 동기화
+      if (ids.length !== c.currentApplicants) {
+        updateCampaign(c.id, { currentApplicants: ids.length });
+      }
     });
   }, [mainTab, campaigns]);
 
-  // users 탭 진입 시 전체 유저 로드
+  // users 탭 진입 시 최신 데이터로 새로고침
   useEffect(() => {
     if (mainTab !== "users") return;
     loadAllUsers();
@@ -265,7 +278,7 @@ function AdminDashboard() {
           {[
             { label: "Total Campaigns", value: campaigns.length, icon: <LayoutGrid className="w-4 h-4 text-gray-400" />, color: "text-gray-900" },
             { label: "Featured", value: featuredCount, icon: <Zap className="w-4 h-4 text-[#004DF6]" />, color: "text-[#004DF6]" },
-            { label: "Total Users", value: allUsers.length || "—", icon: <Users className="w-4 h-4 text-emerald-500" />, color: "text-emerald-600" },
+            { label: "Total Users", value: totalUsers ?? "...", icon: <Users className="w-4 h-4 text-emerald-500" />, color: "text-emerald-600" },
             { label: "Total Applications", value: totalApplications, icon: <Check className="w-4 h-4 text-orange-500" />, color: "text-orange-500" },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
