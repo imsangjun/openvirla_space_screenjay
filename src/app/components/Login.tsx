@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
+import { Check } from "lucide-react";
 
 // ── 상수 ──────────────────────────────────────────────────────────────
 const NATIONALITIES = [
@@ -49,20 +50,18 @@ export function Login() {
 
   // ── Sign Up fields ──
   const [signupData, setSignupData] = useState({
-    // account
     username: "", email: "", password: "", confirmPassword: "",
-    // personal info (mandatory)
     fullName: "", phoneNumber: "", birthYear: "",
     nationality: "", countryLocation: "",
     instagramLink: "",
-    // optional
     telegramId: "", tiktokLink: "", youtubeLink: "", otherPlatformLink: "",
-    // creator profile
-    contentSpecialty: "", contentSpecialtyEtc: "",
-    strongestPoint: "", strongestPointEtc: "",
+    contentSpecialtyEtc: "",
+    strongestPointEtc: "",
     equipment: "",
   });
   const [shootFormats, setShootFormats] = useState<string[]>([]);
+  const [contentSpecialties, setContentSpecialties] = useState<string[]>([]);
+  const [strongestPoints, setStrongestPoints] = useState<string[]>([]);
 
   // ── Forgot password fields ──
   const [forgotEmail, setForgotEmail] = useState("");
@@ -103,32 +102,41 @@ export function Login() {
     if (signupData.password.length < 6) {
       setError("비밀번호는 최소 6자 이상이어야 합니다."); return;
     }
+    if (contentSpecialties.length === 0) {
+      setError("Content Specialty를 하나 이상 선택해주세요."); return;
+    }
+    if (strongestPoints.length === 0) {
+      setError("Strongest Point를 하나 이상 선택해주세요."); return;
+    }
 
     const profile = {
-      fullName:           signupData.fullName,
-      phoneNumber:        signupData.phoneNumber,
-      telegramId:         signupData.telegramId,
-      birthYear:          signupData.birthYear,
-      nationality:        signupData.nationality,
-      countryLocation:    signupData.countryLocation,
-      instagramLink:      signupData.instagramLink,
-      tiktokLink:         signupData.tiktokLink,
-      youtubeLink:        signupData.youtubeLink,
-      otherPlatformLink:  signupData.otherPlatformLink,
-      contentSpecialty:   signupData.contentSpecialty,
-      contentSpecialtyEtc: signupData.contentSpecialtyEtc,
-      strongestPoint:     signupData.strongestPoint,
-      strongestPointEtc:  signupData.strongestPointEtc,
+      fullName:             signupData.fullName,
+      phoneNumber:          signupData.phoneNumber,
+      telegramId:           signupData.telegramId,
+      birthYear:            signupData.birthYear,
+      nationality:          signupData.nationality,
+      countryLocation:      signupData.countryLocation,
+      instagramLink:        signupData.instagramLink,
+      tiktokLink:           signupData.tiktokLink,
+      youtubeLink:          signupData.youtubeLink,
+      otherPlatformLink:    signupData.otherPlatformLink,
+      contentSpecialties,
+      contentSpecialtyEtc:  signupData.contentSpecialtyEtc,
+      strongestPoints,
+      strongestPointEtc:    signupData.strongestPointEtc,
       shootFormats,
-      equipment:          signupData.equipment,
+      equipment:            signupData.equipment,
     };
 
     try {
+      setSubmitting(true);
       await signupWithEmail(signupData.username, signupData.email, signupData.password, profile);
       setSuccess("가입이 완료됐습니다! 이메일을 확인해 인증 후 로그인해주세요.");
       setMode("login");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -189,9 +197,21 @@ export function Login() {
   };
 
   const toggleShootFormat = (fmt: string) => {
-    setShootFormats(prev =>
-      prev.includes(fmt) ? prev.filter(f => f !== fmt) : [...prev, fmt]
-    );
+    setShootFormats(prev => prev.includes(fmt) ? prev.filter(f => f !== fmt) : [...prev, fmt]);
+  };
+  const toggleContentSpecialty = (opt: string) => {
+    setContentSpecialties(prev => {
+      const next = prev.includes(opt) ? prev.filter(v => v !== opt) : [...prev, opt];
+      if (!next.includes("etc")) setSignupData(d => ({ ...d, contentSpecialtyEtc: "" }));
+      return next;
+    });
+  };
+  const toggleStrongestPoint = (opt: string) => {
+    setStrongestPoints(prev => {
+      const next = prev.includes(opt) ? prev.filter(v => v !== opt) : [...prev, opt];
+      if (!next.includes("etc")) setSignupData(d => ({ ...d, strongestPointEtc: "" }));
+      return next;
+    });
   };
 
   // ── 렌더 헬퍼 ─────────────────────────────────────────────────────
@@ -376,47 +396,75 @@ export function Login() {
                 {/* Creator Profile */}
                 <div>
                   <h3 className="text-sm font-bold text-[#004DF6] uppercase tracking-wide mb-4 pb-2 border-b border-gray-100">Creator Profile</h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-4">
+
+                    {/* Q1 */}
                     <div>
-                      <label className={labelCls}>Content Specialty *</label>
-                      <select value={signupData.contentSpecialty} onChange={e => setSignupData({...signupData, contentSpecialty: e.target.value})}
-                        required className={inputCls}>
-                        <option value="">Select specialty</option>
-                        {CONTENT_SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      {signupData.contentSpecialty === "etc" && (
-                        <input type="text" value={signupData.contentSpecialtyEtc} onChange={e => setSignupData({...signupData, contentSpecialtyEtc: e.target.value})}
+                      <label className={labelCls}>Q1. Content Specialty * <span className="text-gray-400 font-normal">(복수 선택 가능)</span></label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {CONTENT_SPECIALTIES.map(opt => (
+                          <button key={opt} type="button" onClick={() => toggleContentSpecialty(opt)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                              contentSpecialties.includes(opt)
+                                ? "bg-[#004DF6] text-white border-[#004DF6]"
+                                : "bg-white text-gray-700 border-gray-300 hover:border-[#004DF6]"
+                            }`}>
+                            {contentSpecialties.includes(opt) && <Check className="w-3.5 h-3.5" />}
+                            {opt === "etc" ? "Other" : opt}
+                          </button>
+                        ))}
+                      </div>
+                      {contentSpecialties.includes("etc") && (
+                        <input type="text" value={signupData.contentSpecialtyEtc}
+                          onChange={e => setSignupData({...signupData, contentSpecialtyEtc: e.target.value})}
                           className={`${inputCls} mt-2`} placeholder="Please specify" />
                       )}
                     </div>
+
+                    {/* Q2 */}
                     <div>
-                      <label className={labelCls}>Strongest Point *</label>
-                      <select value={signupData.strongestPoint} onChange={e => setSignupData({...signupData, strongestPoint: e.target.value})}
-                        required className={inputCls}>
-                        <option value="">Select strength</option>
-                        {STRONGEST_POINTS.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      {signupData.strongestPoint === "etc" && (
-                        <input type="text" value={signupData.strongestPointEtc} onChange={e => setSignupData({...signupData, strongestPointEtc: e.target.value})}
+                      <label className={labelCls}>Q2. Strongest Point * <span className="text-gray-400 font-normal">(복수 선택 가능)</span></label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {STRONGEST_POINTS.map(opt => (
+                          <button key={opt} type="button" onClick={() => toggleStrongestPoint(opt)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                              strongestPoints.includes(opt)
+                                ? "bg-[#004DF6] text-white border-[#004DF6]"
+                                : "bg-white text-gray-700 border-gray-300 hover:border-[#004DF6]"
+                            }`}>
+                            {strongestPoints.includes(opt) && <Check className="w-3.5 h-3.5" />}
+                            {opt === "etc" ? "Other" : opt}
+                          </button>
+                        ))}
+                      </div>
+                      {strongestPoints.includes("etc") && (
+                        <input type="text" value={signupData.strongestPointEtc}
+                          onChange={e => setSignupData({...signupData, strongestPointEtc: e.target.value})}
                           className={`${inputCls} mt-2`} placeholder="Please specify" />
                       )}
                     </div>
-                    <div className="col-span-2">
-                      <label className={labelCls}>Shoot Formats *</label>
-                      <div className="flex flex-wrap gap-2">
+
+                    {/* Q3 Shoot Formats */}
+                    <div>
+                      <label className={labelCls}>Q3. Shoot Formats *</label>
+                      <div className="flex flex-wrap gap-2 mt-1">
                         {SHOOT_FORMATS.map(fmt => (
                           <button key={fmt} type="button" onClick={() => toggleShootFormat(fmt)}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
                               shootFormats.includes(fmt)
                                 ? "bg-[#004DF6] text-white border-[#004DF6]"
                                 : "bg-white text-gray-700 border-gray-300 hover:border-[#004DF6]"
-                            }`}>{fmt}</button>
+                            }`}>{fmt}
+                          </button>
                         ))}
                       </div>
                     </div>
-                    <div className="col-span-2">
-                      <label className={labelCls}>Equipment *</label>
-                      <input type="text" value={signupData.equipment} onChange={e => setSignupData({...signupData, equipment: e.target.value})}
+
+                    {/* Q4 Equipment */}
+                    <div>
+                      <label className={labelCls}>Q4. Equipment *</label>
+                      <input type="text" value={signupData.equipment}
+                        onChange={e => setSignupData({...signupData, equipment: e.target.value})}
                         required className={inputCls} placeholder="e.g. iPhone 15 Pro, Sony A7III" />
                     </div>
                   </div>
