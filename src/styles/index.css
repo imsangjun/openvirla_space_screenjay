@@ -18,7 +18,7 @@
 }
 
 .animate-scroll-left {
-  animation: scroll-left 50s linear infinite;
+  animation: scroll-left 60s linear infinite;
   width: max-content;
   display: flex;
 }
