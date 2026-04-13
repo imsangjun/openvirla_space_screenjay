@@ -22,8 +22,16 @@ export function Home() {
   };
 
   const [videoUrls, setVideoUrls] = useState<string[]>([]);
-  const [currentVideo, setCurrentVideo] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const [offset, setOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState(0);
+  const [dragDelta, setDragDelta] = useState(0);
+  const animRef = useRef<number>(0);
+  const speedRef = useRef(0.4); // px per frame
+  const offsetRef = useRef(0);
+  const CARD_W = 280; // 9:16 비율 카드 너비
+  const GAP = 16;
+  const ITEM_W = CARD_W + GAP;
 
   useEffect(() => {
     supabase.from("showcase_videos")
@@ -34,10 +42,45 @@ export function Home() {
       });
   }, []);
 
-  const goTo = (idx: number) => {
-    setCurrentVideo(idx);
-    if (videoRef.current) { videoRef.current.load(); videoRef.current.play(); }
+  // 무한 자동 스크롤
+  useEffect(() => {
+    if (videoUrls.length === 0) return;
+    const totalW = videoUrls.length * ITEM_W;
+    const tick = () => {
+      if (!isDragging) {
+        offsetRef.current = (offsetRef.current + speedRef.current) % totalW;
+        setOffset(offsetRef.current);
+      }
+      animRef.current = requestAnimationFrame(tick);
+    };
+    animRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [videoUrls.length, isDragging]);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart(e.clientX);
+    setDragDelta(0);
   };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const delta = dragStart - e.clientX;
+    setDragDelta(delta);
+    offsetRef.current = (offsetRef.current + delta * 0.05);
+  };
+  const onMouseUp = () => { setIsDragging(false); setDragDelta(0); };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    setDragStart(e.touches[0].clientX);
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const delta = dragStart - e.touches[0].clientX;
+    offsetRef.current = (offsetRef.current + delta * 0.05);
+    setDragStart(e.touches[0].clientX);
+  };
+  const onTouchEnd = () => setIsDragging(false);
 
   return (
     <div className="bg-white">
@@ -178,40 +221,60 @@ export function Home() {
         </div>
       </section>
 
-      {/* Video Showcase Section */}
+      {/* Video Showcase Section - 무한 릴스 캐러셀 */}
       {videoUrls.length > 0 && (
-        <section className="py-16 bg-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-2xl overflow-hidden bg-black" style={{aspectRatio: "16/9"}}>
-              <video
-                ref={videoRef}
-                key={videoUrls[currentVideo]}
-                src={videoUrls[currentVideo]}
-                autoPlay
-                muted
-                playsInline
-                onEnded={() => goTo((currentVideo + 1) % videoUrls.length)}
-                className="w-full h-full object-cover"
-              />
-              {/* 좌우 화살표 */}
-              <button
-                onClick={() => goTo((currentVideo - 1 + videoUrls.length) % videoUrls.length)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all text-lg"
-              >‹</button>
-              <button
-                onClick={() => goTo((currentVideo + 1) % videoUrls.length)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all text-lg"
-              >›</button>
-              {/* 하단 인디케이터 */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {videoUrls.map((_, i) => (
-                  <button
+        <section className="py-16 bg-white overflow-hidden">
+          {/* 좌우 페이드 마스크 */}
+          <div
+            className="relative w-full select-none cursor-grab active:cursor-grabbing"
+            style={{ maskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)" }}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onMouseLeave={onMouseUp}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
+            {/* 무한 트랙: 원본 + 복제본 */}
+            <div
+              className="flex"
+              style={{
+                gap: "16px",
+                transform: `translateX(-${offset % (videoUrls.length * (280 + 16))}px)`,
+                willChange: "transform",
+              }}
+            >
+              {[...videoUrls, ...videoUrls, ...videoUrls].map((url, i) => {
+                // 현재 화면 중앙에 가장 가까운 카드를 "활성" 처리
+                const totalW = videoUrls.length * (280 + 16);
+                const cardCenter = i * (280 + 16) + 140;
+                const viewCenter = offset + (typeof window !== "undefined" ? window.innerWidth / 2 : 700);
+                const dist = Math.abs(cardCenter - viewCenter);
+                const isActive = dist < 200;
+                return (
+                  <div
                     key={i}
-                    onClick={() => goTo(i)}
-                    className={`w-2 h-2 rounded-full transition-all ${i === currentVideo ? "bg-white w-6" : "bg-white/50"}`}
-                  />
-                ))}
-              </div>
+                    className="flex-shrink-0 rounded-2xl overflow-hidden transition-all duration-300"
+                    style={{
+                      width: "280px",
+                      height: "497px", // 9:16
+                      opacity: isActive ? 1 : 0.45,
+                      filter: isActive ? "none" : "blur(2px)",
+                      transform: isActive ? "scale(1.04)" : "scale(0.96)",
+                    }}
+                  >
+                    <video
+                      src={url}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover pointer-events-none"
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
