@@ -40,8 +40,8 @@ const PlatformIcon = ({ platform }: { platform: string }) => {
 
 export function Campaign() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { campaigns, applyToCampaign, isApplied, refreshApplied } = useCampaigns();
+  const { user, isLoading: authLoading } = useAuth();
+  const { campaigns, isLoading: campaignsLoading, applyToCampaign, isApplied, refreshApplied } = useCampaigns();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignOffer | null>(null);
@@ -126,6 +126,16 @@ export function Campaign() {
           <p className="text-base text-[#7a8594]">Browse and apply for brand collaboration opportunities</p>
         </div>
       </section>
+
+      {(authLoading || campaignsLoading) ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-2xl bg-gray-100 animate-pulse h-64" />
+            ))}
+          </div>
+        </div>
+      ) : (
 
       {/* Featured */}
       {featuredCampaigns.length > 0 && (
@@ -380,6 +390,7 @@ export function Campaign() {
         </DialogContent>
       </Dialog>
 
+      )}
     </div>
   );
 }
