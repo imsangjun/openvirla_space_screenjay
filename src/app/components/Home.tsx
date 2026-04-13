@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../lib/supabaseClient";
 
 export function Home() {
   const navigate = useNavigate();
@@ -17,6 +19,24 @@ export function Home() {
   const handleBrowseCampaign = () => {
     navigate("/campaign");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const [videoUrls, setVideoUrls] = useState<string[]>([]);
+  const [currentVideo, setCurrentVideo] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    supabase.from("showcase_videos")
+      .select("url, sort_order")
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        if (data && data.length > 0) setVideoUrls(data.map((d) => d.url));
+      });
+  }, []);
+
+  const goTo = (idx: number) => {
+    setCurrentVideo(idx);
+    if (videoRef.current) { videoRef.current.load(); videoRef.current.play(); }
   };
 
   return (
@@ -77,7 +97,7 @@ export function Home() {
                   <div className="flex flex-col gap-1">
                     <div className="flex items-baseline gap-2 leading-none">
                       <span className="font-black tracking-[-0.03em]" style={{fontSize: '2.4rem', lineHeight: 1}}>
-                        <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Space</span>
+                        <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Viral</span>
                       </span>
                       <span className="text-xl font-bold text-[#000000]">is...</span>
                     </div>
@@ -108,7 +128,7 @@ export function Home() {
             {/* Right Side */}
             <div className="flex-1 text-right mt-4 md:mt-6 lg:mt-8 pb-12" style={{maxWidth: '520px'}}>
               <h1 className="text-[clamp(1.6rem,3.5vw,3.2rem)] font-black leading-[1.15] mb-12 text-[#004DF6] uppercase tracking-tight">
-                OpenSpace is a platform connecting <span className="inline bg-[#004DF6] text-white px-1">influencers</span><br />with<br /><span className="inline bg-[#004DF6] text-white px-1">global brands,</span> creating authentic content that drives engagement.
+                OpenViral is a platform connecting <span className="inline bg-[#004DF6] text-white px-1">influencers</span><br />with<br /><span className="inline bg-[#004DF6] text-white px-1">global brands,</span> creating authentic content that drives engagement.
               </h1>
 
               <div className="flex items-center justify-end gap-4 mb-16">
@@ -157,6 +177,45 @@ export function Home() {
           </div>
         </div>
       </section>
+
+      {/* Video Showcase Section */}
+      {videoUrls.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative rounded-2xl overflow-hidden bg-black" style={{aspectRatio: "16/9"}}>
+              <video
+                ref={videoRef}
+                key={videoUrls[currentVideo]}
+                src={videoUrls[currentVideo]}
+                autoPlay
+                muted
+                playsInline
+                onEnded={() => goTo((currentVideo + 1) % videoUrls.length)}
+                className="w-full h-full object-cover"
+              />
+              {/* 좌우 화살표 */}
+              <button
+                onClick={() => goTo((currentVideo - 1 + videoUrls.length) % videoUrls.length)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all text-lg"
+              >‹</button>
+              <button
+                onClick={() => goTo((currentVideo + 1) % videoUrls.length)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all text-lg"
+              >›</button>
+              {/* 하단 인디케이터 */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {videoUrls.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goTo(i)}
+                    className={`w-2 h-2 rounded-full transition-all ${i === currentVideo ? "bg-white w-6" : "bg-white/50"}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Services Section */}
       <section className="py-20">
@@ -207,7 +266,7 @@ export function Home() {
           </p>
           <button
             onClick={handleBrowseCampaign}
-            className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium rounded-lg text-white bg-[#004DF6] hover:bg-[#0041cc] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+            className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-lg text-white bg-[#004DF6] border-4 border-black hover:bg-[#0041cc] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
           >
             Explore Campaigns
           </button>
@@ -223,7 +282,7 @@ export function Home() {
           </div>
           <div className="text-center mb-16">
             <h2 className="text-[clamp(3rem,15vw,12rem)] font-black leading-none tracking-tighter uppercase text-white">
-              OPENSPACE
+              OPENVIRAL
             </h2>
           </div>
         </div>
