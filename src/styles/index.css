@@ -22,3 +22,14 @@
   width: max-content;
   display: flex;
 }
+
+@keyframes scroll-ltr {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-scroll-ltr {
+  animation: scroll-ltr 30s linear infinite;
+  width: max-content;
+  display: flex;
+}
