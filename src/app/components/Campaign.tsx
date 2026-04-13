@@ -136,7 +136,7 @@ export function Campaign() {
           </div>
         </div>
       ) : (
-
+      <>
       {/* Featured */}
       {featuredCampaigns.length > 0 && (
         <section className="py-10 mb-8">
@@ -390,6 +390,7 @@ export function Campaign() {
         </DialogContent>
       </Dialog>
 
+      </>
       )}
     </div>
   );
