@@ -27,7 +27,7 @@ export function Home() {
   const [dragStart, setDragStart] = useState(0);
   const [dragDelta, setDragDelta] = useState(0);
   const animRef = useRef<number>(0);
-  const speedRef = useRef(0.8); // px per frame
+  const speedRef = useRef(1.2); // px per frame
   const offsetRef = useRef(0);
   const CARD_W = 280; // 9:16 비율 카드 너비
   const GAP = 16;
