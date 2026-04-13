@@ -148,19 +148,20 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
       user_id: userId,
       campaign_id: campaignId,
     });
-    if (!error) {
-      setAppliedCampaignIds((prev) => [...prev, campaignId]);
-      // current_applicants 증가
-      setCampaigns((prev) => prev.map((c) =>
-        c.id === campaignId ? { ...c, currentApplicants: c.currentApplicants + 1 } : c
-      ));
-      await supabase.rpc("increment_applicants", { campaign_id: campaignId }).catch(() => {
-        // RPC 없으면 직접 update
-        supabase.from("campaigns")
-          .update({ current_applicants: (campaigns.find(c => c.id === campaignId)?.currentApplicants ?? 0) + 1 })
-          .eq("id", campaignId);
-      });
-    }
+  const applyToCampaign = async (userId: string, campaignId: number) => {
+    const { error } = await supabase.from("applications").insert({
+      user_id: userId,
+      campaign_id: campaignId,
+    });
+    if (error) throw new Error(error.message);
+    setAppliedCampaignIds((prev) => [...prev, campaignId]);
+    setCampaigns((prev) => prev.map((c) =>
+      c.id === campaignId ? { ...c, currentApplicants: c.currentApplicants + 1 } : c
+    ));
+    // DB current_applicants 동기화
+    await supabase.from("campaigns")
+      .update({ current_applicants: (campaigns.find(c => c.id === campaignId)?.currentApplicants ?? 0) + 1 })
+      .eq("id", campaignId);
   };
 
   const cancelCampaign = async (userId: string, campaignId: number) => {
