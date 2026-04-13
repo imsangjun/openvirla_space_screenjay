@@ -56,13 +56,8 @@ export function MyPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string>(user?.avatar ?? "");
-
-  if (!user) {
-    navigate("/login");
-    return null;
-  }
-
   const [activeCampaigns, setActiveCampaigns] = useState<CampaignOffer[]>([]);
+  const [cancelConfirmId, setCancelConfirmId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -70,7 +65,11 @@ export function MyPage() {
     getAppliedCampaigns(user.id).then(setActiveCampaigns);
   }, [user?.id]);
 
-  const [cancelConfirmId, setCancelConfirmId] = useState<number | null>(null);
+  // hooks 선언 후 조건부 리턴
+  if (!user) {
+    navigate("/login");
+    return null;
+  }
 
   const handleCancelCampaign = async (campaignId: number) => {
     if (!user) return;
