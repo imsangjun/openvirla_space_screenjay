@@ -7,7 +7,7 @@ import {
   Star, StarOff, Pencil, Trash2, Plus, X, Check,
   Image as ImageIcon, ChevronDown, ChevronUp,
   Shield, LayoutGrid, Zap, Users, User, ChevronLeft,
-  Sparkles, Clock, Loader2, Timer, RefreshCw,
+  Sparkles, Clock, Loader2, Timer, RefreshCw, Upload,
 } from "lucide-react";
 
 const PLATFORM_OPTIONS = ["instagram", "tiktok", "youtube", "twitter"] as const;
@@ -897,15 +897,85 @@ function CampaignForm({ form, setForm, togglePlatform, updateListItem, addListIt
   removeListItem: (field: "requirements" | "deliverables", i: number) => void;
 }) {
   const cls = "w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#004DF6] focus:ring-2 focus:ring-[#004DF6]/20 bg-gray-50 transition-all";
+  const [imageTab, setImageTab] = React.useState<"url" | "upload">("url");
+  const [uploading, setUploading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState("");
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { setUploadError("이미지 파일만 업로드 가능합니다."); return; }
+    if (file.size > 5 * 1024 * 1024) { setUploadError("5MB 이하 파일만 업로드 가능합니다."); return; }
+
+    setUploading(true);
+    setUploadError("");
+    try {
+      const { supabase } = await import("../lib/supabaseClient");
+      const ext = file.name.split(".").pop();
+      const fileName = `campaign-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("campaign-images")
+        .upload(fileName, file, { upsert: true });
+      if (error) throw new Error(error.message);
+      const { data: { publicUrl } } = supabase.storage
+        .from("campaign-images")
+        .getPublicUrl(fileName);
+      setForm((f) => ({ ...f, image: publicUrl }));
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "업로드 실패");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="grid grid-cols-2 gap-6">
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Image URL</label>
-          <div className="flex gap-2">
-            <input type="text" value={form.image} onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))} placeholder="https://..." className={cls + " flex-1"} />
-            {form.image && <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-gray-200"><ImageWithFallback src={form.image} alt="preview" className="w-full h-full object-cover" /></div>}
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Image</label>
+          {/* 탭 */}
+          <div className="flex gap-1 mb-2 bg-gray-100 rounded-lg p-1 w-fit">
+            <button type="button" onClick={() => setImageTab("url")}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${imageTab === "url" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+              URL
+            </button>
+            <button type="button" onClick={() => setImageTab("upload")}
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${imageTab === "upload" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+              파일 업로드
+            </button>
           </div>
+
+          {imageTab === "url" ? (
+            <div className="flex gap-2">
+              <input type="text" value={form.image} onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))} placeholder="https://..." className={cls + " flex-1"} />
+              {form.image && <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-gray-200"><ImageWithFallback src={form.image} alt="preview" className="w-full h-full object-cover" /></div>}
+            </div>
+          ) : (
+            <div>
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 hover:border-[#004DF6] hover:text-[#004DF6] transition-all disabled:opacity-60">
+                {uploading ? <><Loader2 className="w-4 h-4 animate-spin" />업로드 중...</> : <><Upload className="w-4 h-4" />클릭하여 이미지 선택 (최대 5MB)</>}
+              </button>
+              {uploadError && <p className="text-xs text-red-500 mt-1">{uploadError}</p>}
+              {form.image && imageTab === "upload" && (
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0">
+                    <ImageWithFallback src={form.image} alt="preview" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-green-600 font-medium">✓ 업로드 완료</p>
+                    <p className="text-xs text-gray-400 truncate">{form.image}</p>
+                  </div>
+                  <button type="button" onClick={() => setForm((f) => ({ ...f, image: "" }))}
+                    className="w-7 h-7 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center flex-shrink-0">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <div><label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Company Name</label><input type="text" value={form.company} onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))} placeholder="e.g. GlowSkin Beauty" className={cls} /></div>
         <div><label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Campaign Title</label><input type="text" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="e.g. Luxury Skincare Review" className={cls} /></div>
