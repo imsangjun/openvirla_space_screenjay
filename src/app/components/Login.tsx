@@ -276,7 +276,7 @@ export function Login() {
                 <div className="relative flex justify-center text-sm"><span className="px-4 bg-white text-gray-500">Or continue with</span></div>
               </div>
               <div className="mt-6">
-                <button type="button" onClick={handleGoogle} disabled={googleLoading || isLoading}
+                <button type="button" onClick={handleGoogle} disabled={googleLoading}
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-60">
                   {googleLoading ? <Spinner /> : (
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
