@@ -123,8 +123,8 @@ export function Campaign() {
         </div>
       </section>
 
-      {/* 로딩 skeleton */}
-      {(authLoading || campaignsLoading) && (
+      {/* 로딩 skeleton - campaignsLoading만 체크 (authLoading과 무관하게 캠페인 표시) */}
+      {campaignsLoading && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -134,8 +134,8 @@ export function Campaign() {
         </div>
       )}
 
-      {/* 로딩 완료 후 콘텐츠 */}
-      {!authLoading && !campaignsLoading && (
+      {/* 로딩 완료 후 콘텐츠 - campaignsLoading만 체크 (authLoading과 무관하게 캠페인 표시) */}
+      {!campaignsLoading && (
         <>
           {/* Featured */}
           {featuredCampaigns.length > 0 && (
