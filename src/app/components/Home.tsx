@@ -61,6 +61,7 @@ export function Home() {
   };
 
   useEffect(() => {
+    console.log("HOME EFFECT RUNNING");
     supabase.from("showcase_videos")
       .select("url, sort_order")
       .order("sort_order", { ascending: true })
