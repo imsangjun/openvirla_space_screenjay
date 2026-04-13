@@ -62,6 +62,8 @@ export function Home() {
 
   useEffect(() => {
     console.log("HOME EFFECT RUNNING");
+    console.log("SB URL", import.meta.env.VITE_SUPABASE_URL);
+    console.log("SB KEY EXISTS", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
     supabase.from("showcase_videos")
       .select("url, sort_order")
       .order("sort_order", { ascending: true })
