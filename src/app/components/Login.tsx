@@ -261,7 +261,7 @@ export function Login() {
                   <button type="button" onClick={() => { reset(); setMode("forgot"); }}
                     className="text-sm text-[#004DF6] hover:underline">Forgot password?</button>
                 </div>
-                {submitBtn("Login", false)}
+                {submitBtn("Login", submitting)}
               </form>
 
               <div className="mt-6 text-center">
@@ -473,7 +473,7 @@ export function Login() {
                   </div>
                 </div>
 
-                {submitBtn("Create Account", false)}
+                {submitBtn("Create Account", submitting)}
               </form>
 
               <div className="mt-6 text-center">
