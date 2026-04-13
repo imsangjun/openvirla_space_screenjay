@@ -62,9 +62,79 @@ function rowToProfile(row: Record<string, unknown>): UserProfile {
 }
 
 /* ══════════════════════════════════════════════════
+   ADMIN PASSWORD GATE
+══════════════════════════════════════════════════ */
+const ADMIN_PASSWORD = "260401";
+
+function AdminPasswordGate({ onSuccess }: { onSuccess: () => void }) {
+  const [input, setInput] = useState("");
+  const [error, setError] = useState(false);
+  const [shake, setShake] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input === ADMIN_PASSWORD) {
+      onSuccess();
+    } else {
+      setError(true);
+      setShake(true);
+      setInput("");
+      setTimeout(() => setShake(false), 500);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f0f2f7] flex items-center justify-center">
+      <div className={`bg-white rounded-2xl shadow-xl p-10 w-full max-w-sm border border-gray-100 ${shake ? "animate-bounce" : ""}`}>
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-14 h-14 bg-[#004DF6] rounded-2xl flex items-center justify-center shadow-lg mb-4">
+            <Shield className="w-7 h-7 text-white" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900">Admin Access</h1>
+          <p className="text-sm text-gray-500 mt-1">비밀번호를 입력하세요</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="password"
+            value={input}
+            onChange={(e) => { setInput(e.target.value); setError(false); }}
+            placeholder="Password"
+            autoFocus
+            className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all ${
+              error
+                ? "border-red-400 focus:ring-red-300 bg-red-50"
+                : "border-gray-200 focus:ring-[#004DF6]/30 bg-gray-50"
+            }`}
+          />
+          {error && (
+            <p className="text-xs text-red-500 font-medium text-center">비밀번호가 올바르지 않습니다.</p>
+          )}
+          <button
+            type="submit"
+            className="w-full py-3 bg-[#004DF6] text-white rounded-xl text-sm font-semibold hover:bg-[#0041cc] transition-all shadow-[0_4px_12px_rgba(0,77,246,0.3)]"
+          >
+            Enter
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    MAIN ADMIN
 ══════════════════════════════════════════════════ */
 export function Admin() {
+  const [authenticated, setAuthenticated] = useState(false);
+
+  if (!authenticated) {
+    return <AdminPasswordGate onSuccess={() => setAuthenticated(true)} />;
+  }
+
+  return <AdminDashboard />;
+}
+
+function AdminDashboard() {
   const { campaigns, isLoading: campaignsLoading, addCampaign, updateCampaign, deleteCampaign, toggleFeatured, getApplicantsByCampaign } = useCampaigns();
 
   const [mainTab, setMainTab] = useState<"campaigns" | "applicants" | "users">("campaigns");
