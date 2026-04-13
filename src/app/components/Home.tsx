@@ -39,12 +39,18 @@ export function Home() {
       .select("url, sort_order")
       .order("sort_order", { ascending: true })
       .then(({ data, error }) => {
+        if (error) {
+          console.error("[showcase_videos] fetch error:", error);
+        }
         if (!error && data && data.length > 0) {
+          console.log("[showcase_videos] loaded:", data.map((d) => d.url));
           setVideoUrls(data.map((d) => d.url));
+        } else if (!error) {
+          console.warn("[showcase_videos] no data returned");
         }
         setVideoLoading(false);
       })
-      .catch(() => setVideoLoading(false));
+      .catch((e) => { console.error("[showcase_videos] catch:", e); setVideoLoading(false); });
   }, []);
 
   // 무한 자동 스크롤
