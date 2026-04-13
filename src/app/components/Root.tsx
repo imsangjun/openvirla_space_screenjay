@@ -54,8 +54,6 @@ export function Root() {
             <div className="absolute left-1/2 transform -translate-x-1/2 flex gap-12">
               <Link to="/" className={`text-base font-medium transition-colors ${isActive("/") ? "text-[#004DF6]" : "text-gray-600 hover:text-gray-900"}`}>Home</Link>
               <Link to="/campaign" className={`text-base font-medium transition-colors ${isActive("/campaign") ? "text-[#004DF6]" : "text-gray-600 hover:text-gray-900"}`}>Campaign</Link>
-              <Link to="/contact" className={`text-base font-medium transition-colors ${isActive("/contact") ? "text-[#004DF6]" : "text-gray-600 hover:text-gray-900"}`}>Contact</Link>
-
             </div>
 
             {/* Auth Area - Right Side */}
@@ -140,7 +138,6 @@ export function Root() {
               <ul className="space-y-2">
                 <li><Link to="/" className="text-gray-600 hover:text-gray-900 text-sm">Home</Link></li>
                 <li><Link to="/campaign" className="text-gray-600 hover:text-gray-900 text-sm">Campaign</Link></li>
-                <li><Link to="/contact" className="text-gray-600 hover:text-gray-900 text-sm">Contact</Link></li>
               </ul>
             </div>
             <div>
