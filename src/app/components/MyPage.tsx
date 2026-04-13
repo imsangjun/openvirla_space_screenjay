@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAuth, UserProfile } from "../context/AuthContext";
-import { useCampaigns } from "../context/CampaignContext";
+import { useCampaigns, CampaignOffer } from "../context/CampaignContext";
 import {
   Camera, User, Phone, Mail, MessageCircle, Calendar,
   Globe, Instagram, Youtube, Link, LogOut, Trash2,
@@ -43,8 +43,8 @@ type Section = "profile-photo" | "personal-info" | "creator-profile" | "campaign
 
 export function MyPage() {
   const navigate = useNavigate();
-  const { user, logout, updateProfile, updateAvatar, deleteAccount } = useAuth();
-  const { getAppliedCampaigns, cancelCampaign } = useCampaigns();
+  const { user, logout, updateProfile, updateAvatar, deleteAccount, refreshProfile } = useAuth();
+  const { getAppliedCampaigns, cancelCampaign, refreshApplied } = useCampaigns();
   const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,19 +62,26 @@ export function MyPage() {
     return null;
   }
 
-  // 실제 apply한 캠페인만 표시
-  const activeCampaigns = user ? getAppliedCampaigns(user.id) : [];
+  const [activeCampaigns, setActiveCampaigns] = useState<CampaignOffer[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    refreshApplied(user.id);
+    getAppliedCampaigns(user.id).then(setActiveCampaigns);
+  }, [user?.id]);
 
   const [cancelConfirmId, setCancelConfirmId] = useState<number | null>(null);
 
-  const handleCancelCampaign = (campaignId: number) => {
+  const handleCancelCampaign = async (campaignId: number) => {
     if (!user) return;
-    cancelCampaign(user.id, campaignId);
+    await cancelCampaign(user.id, campaignId);
     setCancelConfirmId(null);
+    const updated = await getAppliedCampaigns(user.id);
+    setActiveCampaigns(updated);
   };
 
-  const handleSaveProfile = () => {
-    updateProfile(form);
+  const handleSaveProfile = async () => {
+    await updateProfile(form);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
