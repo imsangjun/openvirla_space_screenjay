@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useCampaigns, CampaignOffer } from "../context/CampaignContext";
 import { UserProfile } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
@@ -178,7 +178,7 @@ export function Admin() {
 function AdminDashboard({ onExpire }: { onExpire: () => void }) {
   const { campaigns, isLoading: campaignsLoading, addCampaign, updateCampaign, deleteCampaign, toggleFeatured, getApplicantsByCampaign } = useCampaigns();
 
-  const [mainTab, setMainTab] = useState<"campaigns" | "applicants" | "users">("campaigns");
+  const [mainTab, setMainTab] = useState<"campaigns" | "applicants" | "users" | "videos">("campaigns");
 
   // ── 세션 타이머 ──
   const [remainingMin, setRemainingMin] = useState<number>(0);
@@ -375,9 +375,9 @@ function AdminDashboard({ onExpire }: { onExpire: () => void }) {
 
         {/* Main Tabs */}
         <div className="flex items-center gap-1 mb-6 bg-white rounded-xl p-1 w-fit shadow-sm border border-gray-100">
-          {(["campaigns", "applicants", "users"] as const).map((tab) => {
-            const labels = { campaigns: "Campaigns", applicants: "Campaign Applicants", users: "User Management" };
-            const icons = { campaigns: <LayoutGrid className="w-3.5 h-3.5" />, applicants: <Users className="w-3.5 h-3.5" />, users: <User className="w-3.5 h-3.5" /> };
+          {(["campaigns", "applicants", "users", "videos"] as const).map((tab) => {
+            const labels = { campaigns: "Campaigns", applicants: "Campaign Applicants", users: "User Management", videos: "홈 영상 관리" };
+            const icons = { campaigns: <LayoutGrid className="w-3.5 h-3.5" />, applicants: <Users className="w-3.5 h-3.5" />, users: <User className="w-3.5 h-3.5" />, videos: <Zap className="w-3.5 h-3.5" /> };
             return (
               <button key={tab} onClick={() => setMainTab(tab)}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${mainTab === tab ? "bg-[#004DF6] text-white shadow-[0_2px_8px_rgba(0,77,246,0.3)]" : "text-gray-600 hover:text-gray-900"}`}>
@@ -537,7 +537,115 @@ function AdminDashboard({ onExpire }: { onExpire: () => void }) {
             setSelectedUserId={setSelectedUserIdUsers}
           />
         )}
+
+        {/* ════ TAB: VIDEOS ════ */}
+        {mainTab === "videos" && <VideosTab />}
       </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   VIDEOS TAB
+══════════════════════════════════════════════════ */
+function VideosTab() {
+  const [videos, setVideos] = useState<{ id: number; url: string; sort_order: number }[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { loadVideos(); }, []);
+
+  const loadVideos = async () => {
+    const { data } = await supabase.from("showcase_videos").select("*").order("sort_order", { ascending: true });
+    if (data) setVideos(data as { id: number; url: string; sort_order: number }[]);
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setUploading(true);
+    setUploadError("");
+    try {
+      for (const file of files) {
+        if (!file.type.startsWith("video/")) continue;
+        if (file.size > 100 * 1024 * 1024) { setUploadError("100MB 이하 파일만 업로드 가능합니다."); continue; }
+        const fileName = `video-${Date.now()}-${Math.random().toString(36).slice(2)}.mp4`;
+        const { error: upErr } = await supabase.storage.from("showcase-videos").upload(fileName, file, { upsert: true });
+        if (upErr) throw new Error(upErr.message);
+        const { data: { publicUrl } } = supabase.storage.from("showcase-videos").getPublicUrl(fileName);
+        const maxOrder = videos.length > 0 ? Math.max(...videos.map(v => v.sort_order)) + 1 : 0;
+        await supabase.from("showcase_videos").insert({ url: publicUrl, sort_order: maxOrder });
+      }
+      await loadVideos();
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "업로드 실패");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDelete = async (id: number, url: string) => {
+    const fileName = url.split("/").pop();
+    if (fileName) await supabase.storage.from("showcase-videos").remove([fileName]);
+    await supabase.from("showcase_videos").delete().eq("id", id);
+    await loadVideos();
+  };
+
+  const moveOrder = async (id: number, direction: "up" | "down") => {
+    const idx = videos.findIndex(v => v.id === id);
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= videos.length) return;
+    const a = videos[idx], b = videos[swapIdx];
+    await supabase.from("showcase_videos").update({ sort_order: b.sort_order }).eq("id", a.id);
+    await supabase.from("showcase_videos").update({ sort_order: a.sort_order }).eq("id", b.id);
+    await loadVideos();
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm text-gray-500">홈 페이지에 표시될 영상을 관리합니다.</p>
+        <div>
+          <input ref={fileInputRef} type="file" accept="video/*" multiple onChange={handleUpload} className="hidden" />
+          <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+            className="flex items-center gap-2 px-4 py-2 bg-[#004DF6] text-white rounded-xl text-sm font-semibold hover:bg-[#0041cc] transition-all disabled:opacity-50 shadow-[0_4px_12px_rgba(0,77,246,0.3)]">
+            {uploading ? <><Loader2 className="w-4 h-4 animate-spin" />업로드 중...</> : <><Plus className="w-4 h-4" />영상 추가</>}
+          </button>
+        </div>
+      </div>
+      {uploadError && <p className="text-sm text-red-500 mb-4">{uploadError}</p>}
+
+      {videos.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 text-gray-400">
+          <Zap className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">등록된 영상이 없습니다</p>
+          <p className="text-xs mt-1">위 버튼으로 영상을 추가해주세요</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {videos.map((video, idx) => (
+            <div key={video.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+              <video src={video.url} className="w-32 h-20 rounded-xl object-cover flex-shrink-0 bg-gray-100" muted />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-400 font-mono truncate">{video.url.split("/").pop()}</p>
+                <p className="text-xs text-gray-500 mt-0.5">순서: {idx + 1}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button onClick={() => moveOrder(video.id, "up")} disabled={idx === 0}
+                  className="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 text-sm">↑</button>
+                <button onClick={() => moveOrder(video.id, "down")} disabled={idx === videos.length - 1}
+                  className="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 text-sm">↓</button>
+                <button onClick={() => handleDelete(video.id, video.url)}
+                  className="w-8 h-8 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
