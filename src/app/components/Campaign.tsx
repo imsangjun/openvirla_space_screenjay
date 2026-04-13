@@ -81,14 +81,21 @@ export function Campaign() {
   };
 
   const handleApply = async () => {
+    // dialog 닫기 전에 먼저 캡처
+    const campaign = selectedCampaign;
+    if (!user) { setIsDialogOpen(false); setIsLoginPromptOpen(true); return; }
+    if (!isProfileComplete(user.profile)) { setIsDialogOpen(false); setIsProfilePromptOpen(true); return; }
+    if (!campaign) return;
+
     setIsDialogOpen(false);
-    if (!user) { setIsLoginPromptOpen(true); return; }
-    if (!isProfileComplete(user.profile)) { setIsProfilePromptOpen(true); return; }
-    if (selectedCampaign) {
-      await applyToCampaign(user.id, selectedCampaign.id);
+    try {
+      await applyToCampaign(user.id, campaign.id);
       await refreshApplied(user.id);
+      setIsSuccessDialogOpen(true);
+    } catch (err) {
+      console.error("Apply failed:", err);
+      // 이미 지원한 경우 등 에러 시에도 성공 팝업 대신 아무것도 안 함
     }
-    setIsSuccessDialogOpen(true);
   };
 
   const categories = ["All", "Product", "Offline"];
