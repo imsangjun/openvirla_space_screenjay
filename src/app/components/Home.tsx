@@ -77,7 +77,7 @@ export function Home() {
                   <div className="flex flex-col gap-1">
                     <div className="flex items-baseline gap-2 leading-none">
                       <span className="font-black tracking-[-0.03em]" style={{fontSize: '2.4rem', lineHeight: 1}}>
-                        <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Viral</span>
+                        <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Space</span>
                       </span>
                       <span className="text-xl font-bold text-[#000000]">is...</span>
                     </div>
@@ -108,7 +108,7 @@ export function Home() {
             {/* Right Side */}
             <div className="flex-1 text-right mt-4 md:mt-6 lg:mt-8 pb-12" style={{maxWidth: '520px'}}>
               <h1 className="text-[clamp(1.6rem,3.5vw,3.2rem)] font-black leading-[1.15] mb-12 text-[#004DF6] uppercase tracking-tight">
-                OpenViral is a platform connecting <span className="inline bg-[#004DF6] text-white px-1">influencers</span><br />with<br /><span className="inline bg-[#004DF6] text-white px-1">global brands,</span> creating authentic content that drives engagement.
+                OpenSpace is a platform connecting <span className="inline bg-[#004DF6] text-white px-1">influencers</span><br />with<br /><span className="inline bg-[#004DF6] text-white px-1">global brands,</span> creating authentic content that drives engagement.
               </h1>
 
               <div className="flex items-center justify-end gap-4 mb-16">
@@ -223,7 +223,7 @@ export function Home() {
           </div>
           <div className="text-center mb-16">
             <h2 className="text-[clamp(3rem,15vw,12rem)] font-black leading-none tracking-tighter uppercase text-white">
-              OPENVIRAL
+              OPENSPACE
             </h2>
           </div>
         </div>
