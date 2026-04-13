@@ -22,12 +22,13 @@ export function Home() {
   };
 
   const [videoUrls, setVideoUrls] = useState<string[]>([]);
+  const [videoLoading, setVideoLoading] = useState(true);
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
   const [dragDelta, setDragDelta] = useState(0);
   const animRef = useRef<number>(0);
-  const speedRef = useRef(1.2); // px per frame
+  const speedRef = useRef(0.4); // px per frame
   const offsetRef = useRef(0);
   const CARD_W = 280; // 9:16 비율 카드 너비
   const GAP = 16;
@@ -37,9 +38,13 @@ export function Home() {
     supabase.from("showcase_videos")
       .select("url, sort_order")
       .order("sort_order", { ascending: true })
-      .then(({ data }) => {
-        if (data && data.length > 0) setVideoUrls(data.map((d) => d.url));
-      });
+      .then(({ data, error }) => {
+        if (!error && data && data.length > 0) {
+          setVideoUrls(data.map((d) => d.url));
+        }
+        setVideoLoading(false);
+      })
+      .catch(() => setVideoLoading(false));
   }, []);
 
   // 무한 자동 스크롤
@@ -90,11 +95,11 @@ export function Home() {
         <div className="absolute inset-0 opacity-[0.08] select-none pointer-events-none flex flex-col justify-around" style={{ overflow: "clip" }}>
           {[
             { text: "VIRAL MARKETING", rtl: true },
-            { text: "OPEN VIRAL", rtl: false },
+            { text: "OPEN SPACE", rtl: false },
             { text: "COLLABORATION CAMPAIGNS", rtl: true },
             { text: "CREATORS", rtl: false },
             { text: "INFLUENCERS", rtl: true },
-            { text: "OPEN VIRAL", rtl: false },
+            { text: "OPEN SPACE", rtl: false },
             { text: "USER GENERATED CONTENT", rtl: true },
             { text: "CREATORS", rtl: false },
             { text: "GROWTH", rtl: true },
@@ -140,7 +145,7 @@ export function Home() {
                   <div className="flex flex-col gap-1">
                     <div className="flex items-baseline gap-2 leading-none">
                       <span className="font-black tracking-[-0.03em]" style={{fontSize: '2.4rem', lineHeight: 1}}>
-                        <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Viral</span>
+                        <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Space</span>
                       </span>
                       <span className="text-xl font-bold text-[#000000]">is...</span>
                     </div>
@@ -161,7 +166,7 @@ export function Home() {
               <div className="relative mt-4 pt-36">
                 <img
                   src="/characters.png"
-                  alt="OpenViral Creators"
+                  alt="OpenSpace Creators"
                   className="absolute bottom-0 left-0 w-[480px] object-contain object-bottom pointer-events-none select-none"
                   style={{ zIndex: 0 }}
                 />
@@ -171,7 +176,7 @@ export function Home() {
             {/* Right Side */}
             <div className="flex-1 text-right mt-4 md:mt-6 lg:mt-8 pb-12" style={{maxWidth: '520px'}}>
               <h1 className="text-[clamp(1.6rem,3.5vw,3.2rem)] font-black leading-[1.15] mb-12 text-[#004DF6] uppercase tracking-tight">
-                OpenViral is a platform connecting <span className="inline bg-[#004DF6] text-white px-1">influencers</span><br />with<br /><span className="inline bg-[#004DF6] text-white px-1">global brands,</span> creating authentic content that drives engagement.
+                OpenSpace is a platform connecting <span className="inline bg-[#004DF6] text-white px-1">influencers</span><br />with<br /><span className="inline bg-[#004DF6] text-white px-1">global brands,</span> creating authentic content that drives engagement.
               </h1>
 
               <div className="flex items-center justify-end gap-4 mb-16">
@@ -222,7 +227,15 @@ export function Home() {
       </section>
 
       {/* Video Showcase Section - 무한 릴스 캐러셀 */}
-      {videoUrls.length > 0 && (
+      {videoLoading ? (
+        <section className="py-16 bg-white overflow-hidden">
+          <div className="flex gap-4 px-8">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex-shrink-0 rounded-2xl bg-gray-100 animate-pulse" style={{ width: 280, height: 497 }} />
+            ))}
+          </div>
+        </section>
+      ) : videoUrls.length > 0 && (
         <section className="py-16 bg-white overflow-hidden">
           {/* 좌우 페이드 마스크 */}
           <div
@@ -345,7 +358,7 @@ export function Home() {
           </div>
           <div className="text-center mb-16">
             <h2 className="text-[clamp(3rem,15vw,12rem)] font-black leading-none tracking-tighter uppercase text-white">
-              OPENVIRAL
+              OPENSPACE
             </h2>
           </div>
         </div>
