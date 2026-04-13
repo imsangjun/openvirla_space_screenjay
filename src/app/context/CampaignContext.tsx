@@ -65,17 +65,22 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loadCampaigns = async () => {
-    setIsLoading(true);
-    const { data, error } = await supabase
-      .from("campaigns")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (!error && data) {
-      setCampaigns(data.map((r) => rowToCampaign(r as Record<string, unknown>)));
-    }
-    setIsLoading(false);
-  };
+  console.log("LOAD CAMPAIGNS RUNNING");
+  setIsLoading(true);
 
+  const { data, error } = await supabase
+    .from("campaigns")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  console.log("LOAD CAMPAIGNS RESULT", { data, error });
+
+  if (!error && data) {
+    setCampaigns(data.map((r) => rowToCampaign(r as Record<string, unknown>)));
+  }
+
+  setIsLoading(false);
+};
   const refreshApplied = async (userId: string) => {
     const { data } = await supabase
       .from("applications")
