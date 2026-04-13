@@ -131,41 +131,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signupWithEmail = async (username: string, email: string, password: string, profile?: UserProfile) => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: username, user_name: username } },
-      });
-      if (error) throw new Error(error.message);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: username, user_name: username } },
+    });
+    if (error) throw new Error(error.message);
 
-      // profiles 행 생성/업데이트 (트리거로 기본 row는 이미 생성됨)
-      if (profile && data.user) {
-        const { error: upsertErr } = await supabase.from("profiles").upsert({
-          id: data.user.id,
-          username,
-          full_name:            profile.fullName,
-          phone_number:         profile.phoneNumber,
-          telegram_id:          profile.telegramId,
-          birth_year:           profile.birthYear,
-          nationality:          profile.nationality,
-          country_location:     profile.countryLocation,
-          instagram_link:       profile.instagramLink,
-          tiktok_link:          profile.tiktokLink,
-          youtube_link:         profile.youtubeLink,
-          other_platform_link:  profile.otherPlatformLink,
-          content_specialties:  profile.contentSpecialties,
-          content_specialty_etc: profile.contentSpecialtyEtc,
-          strongest_points:     profile.strongestPoints,
-          strongest_point_etc:  profile.strongestPointEtc,
-          shoot_formats:        profile.shootFormats,
-          equipment:            profile.equipment,
-        });
-        if (upsertErr) console.error("Profile upsert error:", upsertErr);
-      }
-    } finally {
-      setIsLoading(false);
+    // profiles 행 생성/업데이트 (트리거로 기본 row는 이미 생성됨)
+    if (profile && data.user) {
+      const { error: upsertErr } = await supabase.from("profiles").upsert({
+        id: data.user.id,
+        username,
+        full_name:            profile.fullName,
+        phone_number:         profile.phoneNumber,
+        telegram_id:          profile.telegramId,
+        birth_year:           profile.birthYear,
+        nationality:          profile.nationality,
+        country_location:     profile.countryLocation,
+        instagram_link:       profile.instagramLink,
+        tiktok_link:          profile.tiktokLink,
+        youtube_link:         profile.youtubeLink,
+        other_platform_link:  profile.otherPlatformLink,
+        content_specialties:  profile.contentSpecialties,
+        content_specialty_etc: profile.contentSpecialtyEtc,
+        strongest_points:     profile.strongestPoints,
+        strongest_point_etc:  profile.strongestPointEtc,
+        shoot_formats:        profile.shootFormats,
+        equipment:            profile.equipment,
+      });
+      if (upsertErr) console.error("Profile upsert error:", upsertErr);
     }
   };
 
