@@ -181,7 +181,11 @@ function AdminDashboard({ onExpire }: { onExpire: () => void }) {
   const [mainTab, setMainTab] = useState<"campaigns" | "applicants" | "users" | "videos">("campaigns");
 
   // ── 세션 타이머 ──
-  const [remainingMin, setRemainingMin] = useState<number>(0);
+  const [remainingMin, setRemainingMin] = useState<number>(() => {
+    const expiry = getStoredExpiry();
+    if (!expiry) return 0;
+    return Math.max(0, Math.floor((expiry - Date.now()) / 60000));
+  });
 
   useEffect(() => {
     const update = () => {
@@ -191,7 +195,7 @@ function AdminDashboard({ onExpire }: { onExpire: () => void }) {
       setRemainingMin(left);
       if (left === 0) onExpire();
     };
-    update();
+    // 마운트 직후엔 실행하지 않고 인터벌에서만 체크
     const interval = setInterval(update, 30 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -323,7 +327,7 @@ function AdminDashboard({ onExpire }: { onExpire: () => void }) {
             </div>
             <div>
               <h1 className="text-lg font-bold text-gray-900 leading-none">Campaign Admin</h1>
-              <p className="text-xs text-gray-500 mt-0.5">OpenViral Dashboard</p>
+              <p className="text-xs text-gray-500 mt-0.5">OpenSpace Dashboard</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
