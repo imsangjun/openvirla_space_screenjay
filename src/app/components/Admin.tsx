@@ -7,7 +7,7 @@ import {
   Star, StarOff, Pencil, Trash2, Plus, X, Check,
   Image as ImageIcon, ChevronDown, ChevronUp,
   Shield, LayoutGrid, Zap, Users, User, ChevronLeft,
-  Sparkles, Clock, Loader2,
+  Sparkles, Clock, Loader2, Timer, RefreshCw,
 } from "lucide-react";
 
 const PLATFORM_OPTIONS = ["instagram", "tiktok", "youtube", "twitter"] as const;
@@ -65,6 +65,23 @@ function rowToProfile(row: Record<string, unknown>): UserProfile {
    ADMIN PASSWORD GATE
 ══════════════════════════════════════════════════ */
 const ADMIN_PASSWORD = "260401";
+const SESSION_KEY = "admin_auth_expiry";
+const SESSION_DURATION = 60 * 60 * 1000; // 1시간 (ms)
+
+function getStoredExpiry(): number | null {
+  try {
+    const v = sessionStorage.getItem(SESSION_KEY);
+    return v ? Number(v) : null;
+  } catch { return null; }
+}
+
+function setStoredExpiry(expiry: number) {
+  try { sessionStorage.setItem(SESSION_KEY, String(expiry)); } catch {}
+}
+
+function clearStoredExpiry() {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+}
 
 function AdminPasswordGate({ onSuccess }: { onSuccess: () => void }) {
   const [input, setInput] = useState("");
@@ -74,6 +91,8 @@ function AdminPasswordGate({ onSuccess }: { onSuccess: () => void }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input === ADMIN_PASSWORD) {
+      const expiry = Date.now() + SESSION_DURATION;
+      setStoredExpiry(expiry);
       onSuccess();
     } else {
       setError(true);
@@ -125,19 +144,63 @@ function AdminPasswordGate({ onSuccess }: { onSuccess: () => void }) {
    MAIN ADMIN
 ══════════════════════════════════════════════════ */
 export function Admin() {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState<boolean>(() => {
+    const expiry = getStoredExpiry();
+    return expiry !== null && Date.now() < expiry;
+  });
+
+  // 만료 체크 (1분마다)
+  useEffect(() => {
+    if (!authenticated) return;
+    const interval = setInterval(() => {
+      const expiry = getStoredExpiry();
+      if (!expiry || Date.now() >= expiry) {
+        clearStoredExpiry();
+        setAuthenticated(false);
+      }
+    }, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [authenticated]);
+
+  const handleSuccess = () => {
+    const expiry = Date.now() + SESSION_DURATION;
+    setStoredExpiry(expiry);
+    setAuthenticated(true);
+  };
 
   if (!authenticated) {
-    return <AdminPasswordGate onSuccess={() => setAuthenticated(true)} />;
+    return <AdminPasswordGate onSuccess={handleSuccess} />;
   }
 
-  return <AdminDashboard />;
+  return <AdminDashboard onExpire={() => { clearStoredExpiry(); setAuthenticated(false); }} />;
 }
 
-function AdminDashboard() {
+function AdminDashboard({ onExpire }: { onExpire: () => void }) {
   const { campaigns, isLoading: campaignsLoading, addCampaign, updateCampaign, deleteCampaign, toggleFeatured, getApplicantsByCampaign } = useCampaigns();
 
   const [mainTab, setMainTab] = useState<"campaigns" | "applicants" | "users">("campaigns");
+
+  // ── 세션 타이머 ──
+  const [remainingMin, setRemainingMin] = useState<number>(0);
+
+  useEffect(() => {
+    const update = () => {
+      const expiry = getStoredExpiry();
+      if (!expiry) { onExpire(); return; }
+      const left = Math.max(0, Math.floor((expiry - Date.now()) / 60000));
+      setRemainingMin(left);
+      if (left === 0) onExpire();
+    };
+    update();
+    const interval = setInterval(update, 30 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const extendSession = () => {
+    const expiry = Date.now() + SESSION_DURATION;
+    setStoredExpiry(expiry);
+    setRemainingMin(60);
+  };
 
   // campaign tab
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -263,12 +326,31 @@ function AdminDashboard() {
               <p className="text-xs text-gray-500 mt-0.5">OpenViral Dashboard</p>
             </div>
           </div>
-          {mainTab === "campaigns" && (
-            <button onClick={() => { setEditingId(null); setIsAdding(true); setForm(emptyForm()); }} disabled={isEditing}
-              className="flex items-center gap-2 px-4 py-2 bg-[#004DF6] text-white rounded-xl text-sm font-semibold hover:bg-[#0041cc] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(0,77,246,0.35)]">
-              <Plus className="w-4 h-4" />New Campaign
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {/* 세션 타이머 + 연장 버튼 */}
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border transition-all ${
+              remainingMin <= 10
+                ? "bg-red-50 border-red-200 text-red-600"
+                : "bg-gray-50 border-gray-200 text-gray-600"
+            }`}>
+              <Timer className="w-4 h-4" />
+              <span>{remainingMin}분 남음</span>
+              <button
+                onClick={extendSession}
+                title="1시간 연장"
+                className="ml-1 flex items-center gap-1 px-2.5 py-1 bg-[#004DF6] text-white rounded-lg text-xs font-semibold hover:bg-[#0041cc] transition-all"
+              >
+                <RefreshCw className="w-3 h-3" />연장
+              </button>
+            </div>
+
+            {mainTab === "campaigns" && (
+              <button onClick={() => { setEditingId(null); setIsAdding(true); setForm(emptyForm()); }} disabled={isEditing}
+                className="flex items-center gap-2 px-4 py-2 bg-[#004DF6] text-white rounded-xl text-sm font-semibold hover:bg-[#0041cc] transition-all disabled:opacity-40 shadow-[0_4px_12px_rgba(0,77,246,0.35)]">
+                <Plus className="w-4 h-4" />New Campaign
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
