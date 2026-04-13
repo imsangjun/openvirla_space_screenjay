@@ -37,7 +37,7 @@ type Mode = "login" | "signup" | "forgot" | "verify";
 export function Login() {
   const navigate    = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, loginWithEmail, signupWithEmail, loginWithGoogle, isLoading } = useAuth();
+  const { user, loginWithEmail, signupWithEmail, loginWithGoogle } = useAuth();
 
   const [mode, setMode]   = useState<Mode>("login");
   const [error, setError] = useState("");
@@ -84,11 +84,14 @@ export function Login() {
   // ── 핸들러: 로그인 ────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault(); reset();
+    setSubmitting(true);
     try {
       await loginWithEmail(loginData.email, loginData.password);
       navigate("/campaign");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "로그인에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -223,9 +226,9 @@ export function Login() {
   );
 
   const submitBtn = (label: string, loading: boolean) => (
-    <button type="submit" disabled={loading || isLoading}
+    <button type="submit" disabled={loading}
       className="w-full py-3 bg-[#004DF6] text-white font-semibold rounded-xl hover:bg-[#0041cc] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-      {(loading || isLoading) ? <><Spinner />Processing...</> : label}
+      {loading ? <><Spinner />Processing...</> : label}
     </button>
   );
 
