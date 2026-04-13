@@ -16,8 +16,8 @@ const handshakeIcon = "/handshake.png";
 function isProfileComplete(profile?: UserProfile): boolean {
   if (!profile) return false;
   return !!(
-    profile.contentSpecialty &&
-    profile.strongestPoint &&
+    (profile.contentSpecialties?.length ?? 0) > 0 &&
+    (profile.strongestPoints?.length ?? 0) > 0 &&
     profile.shootFormats?.length > 0 &&
     profile.equipment
   );
@@ -41,7 +41,7 @@ const PlatformIcon = ({ platform }: { platform: string }) => {
 export function Campaign() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { campaigns, applyToCampaign, isApplied } = useCampaigns();
+  const { campaigns, applyToCampaign, isApplied, refreshApplied } = useCampaigns();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignOffer | null>(null);
@@ -54,6 +54,10 @@ export function Campaign() {
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const featuredCampaigns = campaigns.filter((c) => c.featured);
+
+  useEffect(() => {
+    if (user) refreshApplied(user.id);
+  }, [user?.id]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -76,20 +80,13 @@ export function Campaign() {
     setIsDialogOpen(true);
   };
 
-  const handleApply = () => {
+  const handleApply = async () => {
     setIsDialogOpen(false);
-    // 1순위: 로그인 여부
-    if (!user) {
-      setIsLoginPromptOpen(true);
-      return;
-    }
-    // 2순위: Creator Profile 완성 여부
-    if (!isProfileComplete(user.profile)) {
-      setIsProfilePromptOpen(true);
-      return;
-    }
+    if (!user) { setIsLoginPromptOpen(true); return; }
+    if (!isProfileComplete(user.profile)) { setIsProfilePromptOpen(true); return; }
     if (selectedCampaign) {
-      applyToCampaign(user.id, selectedCampaign.id);
+      await applyToCampaign(user.id, selectedCampaign.id);
+      await refreshApplied(user.id);
     }
     setIsSuccessDialogOpen(true);
   };
