@@ -66,6 +66,8 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
 
   const loadCampaigns = async () => {
   console.log("LOAD CAMPAIGNS RUNNING");
+  console.log("SB URL", import.meta.env.VITE_SUPABASE_URL);
+  console.log("SB KEY EXISTS", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
   setIsLoading(true);
 
   const { data, error } = await supabase
