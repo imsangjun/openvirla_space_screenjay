@@ -55,9 +55,7 @@ export function Root() {
               <Link to="/" className={`text-base font-medium transition-colors ${isActive("/") ? "text-[#004DF6]" : "text-gray-600 hover:text-gray-900"}`}>Home</Link>
               <Link to="/campaign" className={`text-base font-medium transition-colors ${isActive("/campaign") ? "text-[#004DF6]" : "text-gray-600 hover:text-gray-900"}`}>Campaign</Link>
               <Link to="/contact" className={`text-base font-medium transition-colors ${isActive("/contact") ? "text-[#004DF6]" : "text-gray-600 hover:text-gray-900"}`}>Contact</Link>
-              <Link to="/codeking1234!" className={`text-base font-medium transition-colors flex items-center gap-1 ${isActive("/admin") ? "text-[#004DF6]" : "text-gray-600 hover:text-gray-900"}`}>
-                <span className="text-xs bg-[#004DF6] text-white px-1.5 py-0.5 rounded font-semibold">ADMIN</span>
-              </Link>
+
             </div>
 
             {/* Auth Area - Right Side */}
