@@ -18,7 +18,6 @@ export interface CampaignOffer {
   featured: boolean;
 }
 
-// DB row → CampaignOffer
 function rowToCampaign(row: Record<string, unknown>): CampaignOffer {
   return {
     id:                row.id as number,
@@ -49,7 +48,7 @@ interface CampaignContextType {
   cancelCampaign: (userId: string, campaignId: number) => Promise<void>;
   getAppliedCampaigns: (userId: string) => Promise<CampaignOffer[]>;
   isApplied: (userId: string, campaignId: number) => boolean;
-  appliedCampaignIds: number[]; // 현재 로그인 유저의 지원 목록 (UI용 캐시)
+  appliedCampaignIds: number[];
   getApplicantsByCampaign: (campaignId: number) => Promise<string[]>;
   refreshApplied: (userId: string) => Promise<void>;
 }
@@ -61,7 +60,6 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [appliedCampaignIds, setAppliedCampaignIds] = useState<number[]>([]);
 
-  // 캠페인 목록 로드
   useEffect(() => {
     loadCampaigns();
   }, []);
@@ -72,14 +70,12 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
       .from("campaigns")
       .select("*")
       .order("created_at", { ascending: false });
-
     if (!error && data) {
       setCampaigns(data.map((r) => rowToCampaign(r as Record<string, unknown>)));
     }
     setIsLoading(false);
   };
 
-  // 현재 유저의 지원 목록 캐시 갱신
   const refreshApplied = async (userId: string) => {
     const { data } = await supabase
       .from("applications")
@@ -104,7 +100,6 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
       deliverables:       campaign.deliverables,
       featured:           campaign.featured,
     }).select().single();
-
     if (!error && data) {
       setCampaigns((prev) => [rowToCampaign(data as Record<string, unknown>), ...prev]);
     }
@@ -125,7 +120,6 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
     if (updates.requirements      !== undefined) dbUpdates.requirements       = updates.requirements;
     if (updates.deliverables      !== undefined) dbUpdates.deliverables       = updates.deliverables;
     if (updates.featured          !== undefined) dbUpdates.featured           = updates.featured;
-
     const { error } = await supabase.from("campaigns").update(dbUpdates).eq("id", id);
     if (!error) {
       setCampaigns((prev) => prev.map((c) => c.id === id ? { ...c, ...updates } : c));
@@ -148,17 +142,11 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
       user_id: userId,
       campaign_id: campaignId,
     });
-  const applyToCampaign = async (userId: string, campaignId: number) => {
-    const { error } = await supabase.from("applications").insert({
-      user_id: userId,
-      campaign_id: campaignId,
-    });
     if (error) throw new Error(error.message);
     setAppliedCampaignIds((prev) => [...prev, campaignId]);
     setCampaigns((prev) => prev.map((c) =>
       c.id === campaignId ? { ...c, currentApplicants: c.currentApplicants + 1 } : c
     ));
-    // DB current_applicants 동기화
     await supabase.from("campaigns")
       .update({ current_applicants: (campaigns.find(c => c.id === campaignId)?.currentApplicants ?? 0) + 1 })
       .eq("id", campaignId);
@@ -187,8 +175,7 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
     return campaigns.filter((c) => ids.includes(c.id));
   };
 
-  const isApplied = (userId: string, campaignId: number): boolean => {
-    // userId는 항상 현재 유저 → appliedCampaignIds 캐시 사용
+  const isApplied = (_userId: string, campaignId: number): boolean => {
     return appliedCampaignIds.includes(campaignId);
   };
 
