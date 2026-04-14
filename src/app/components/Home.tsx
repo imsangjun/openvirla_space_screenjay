@@ -277,7 +277,7 @@ export function Home() {
             {/* Characters - Bottom Left/Center */}
             <div className="flex-1">
               <img
-                src="/characters.png"
+                src="/characters.svg"
                 alt="Creator Characters"
                 className="max-h-[50vh] w-auto object-contain"
               />
