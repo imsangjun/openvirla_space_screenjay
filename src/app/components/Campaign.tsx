@@ -376,7 +376,7 @@ export function Campaign() {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle className="sr-only">Login Required</DialogTitle><DialogDescription className="sr-only">Login needed</DialogDescription></DialogHeader>
           <div className="flex flex-col items-center justify-center text-center py-8 px-4">
-            <div className="mb-6"><img src={handshakeIcon} alt="Handshake" className="w-48 h-48 object-contain" /></div>
+            <div className="mb-6"><img src="/login_required.svg" alt="Login Required" className="w-48 h-48 object-contain" /></div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Login Required!</h2>
             <p className="text-sm text-gray-600 mb-8">Please log in or sign up to apply for this campaign.</p>
             <button onClick={() => { setIsLoginPromptOpen(false); navigate("/login"); }} className="w-full mb-3 px-8 py-3 bg-[#004DF6] rounded-xl text-white font-medium hover:bg-[#0041cc] transition-all">Log In</button>
