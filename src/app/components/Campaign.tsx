@@ -151,7 +151,7 @@ export function Campaign() {
                       {[...Array(3)].map((_, setIndex) =>
                         featuredCampaigns.map((offer) => (
                           <div key={`scroll-${setIndex}-${offer.id}`} onClick={() => handleCardClick(offer)}
-                            className="flex-shrink-0 w-[140px] md:w-[320px] overflow-hidden cursor-pointer transition-all duration-200 md:hover:scale-[1.03] rounded-2xl" style={{background: "linear-gradient(160deg, #f0f4ff 0%, #e6f0ff 100%)", boxShadow: "8px 8px 20px rgba(0,77,246,0.18), -6px -6px 16px rgba(255,255,255,1), inset 2px 2px 5px rgba(255,255,255,0.9), inset -2px -2px 5px rgba(0,77,246,0.08)"}}>
+                            className="flex-shrink-0 w-[140px] md:w-[320px] bg-white/60 backdrop-blur-lg rounded-md border border-white/80 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/80 md:hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
                             <div className="relative h-24 md:h-40 rounded-t-md overflow-hidden">
                               <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -242,7 +242,7 @@ export function Campaign() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                 {filteredCampaigns.map((offer) => (
                   <div key={offer.id} onClick={() => handleCardClick(offer)}
-                    className="overflow-hidden cursor-pointer transition-all duration-200 md:hover:scale-[1.03] rounded-2xl" style={{background: "linear-gradient(160deg, #f0f4ff 0%, #e6f0ff 100%)", boxShadow: "8px 8px 20px rgba(0,77,246,0.18), -6px -6px 16px rgba(255,255,255,1), inset 2px 2px 5px rgba(255,255,255,0.9), inset -2px -2px 5px rgba(0,77,246,0.08)"}}>
+                    className="bg-white/40 backdrop-blur-lg rounded-lg md:rounded-md border border-white/60 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/60 md:hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
                     <div className="relative h-24 md:h-40 rounded-t-lg md:rounded-t-md overflow-hidden">
                       <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
