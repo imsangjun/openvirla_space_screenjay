@@ -151,7 +151,7 @@ export function Campaign() {
                       {[...Array(3)].map((_, setIndex) =>
                         featuredCampaigns.map((offer) => (
                           <div key={`scroll-${setIndex}-${offer.id}`} onClick={() => handleCardClick(offer)}
-                            className="flex-shrink-0 w-[140px] md:w-[320px] bg-white/60 backdrop-blur-lg rounded-md border border-white/80 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/80 md:hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
+                            className="flex-shrink-0 w-[140px] md:w-[320px] overflow-hidden cursor-pointer transition-all duration-200 md:hover:scale-[1.03] rounded-2xl" style={{background: "linear-gradient(160deg, #f0f4ff 0%, #e6f0ff 100%)", boxShadow: "8px 8px 20px rgba(0,77,246,0.18), -6px -6px 16px rgba(255,255,255,1), inset 2px 2px 5px rgba(255,255,255,0.9), inset -2px -2px 5px rgba(0,77,246,0.08)"}}>
                             <div className="relative h-24 md:h-40 rounded-t-md overflow-hidden">
                               <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -242,7 +242,7 @@ export function Campaign() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                 {filteredCampaigns.map((offer) => (
                   <div key={offer.id} onClick={() => handleCardClick(offer)}
-                    className="bg-white/40 backdrop-blur-lg rounded-lg md:rounded-md border border-white/60 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/60 md:hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
+                    className="overflow-hidden cursor-pointer transition-all duration-200 md:hover:scale-[1.03] rounded-2xl" style={{background: "linear-gradient(160deg, #f0f4ff 0%, #e6f0ff 100%)", boxShadow: "8px 8px 20px rgba(0,77,246,0.18), -6px -6px 16px rgba(255,255,255,1), inset 2px 2px 5px rgba(255,255,255,0.9), inset -2px -2px 5px rgba(0,77,246,0.08)"}}>
                     <div className="relative h-24 md:h-40 rounded-t-lg md:rounded-t-md overflow-hidden">
                       <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -346,11 +346,11 @@ export function Campaign() {
                 </div>
               </div>
               <DialogFooter className="mt-6">
-                <button onClick={() => setIsDialogOpen(false)} className="px-6 py-2.5 bg-gray-200 rounded-lg text-gray-700 font-medium hover:bg-gray-300 transition-all">Close</button>
+                <button onClick={() => setIsDialogOpen(false)} className="px-6 py-2.5 rounded-xl text-gray-600 font-semibold transition-all active:scale-95" style={{background: "linear-gradient(160deg, #f0f4ff 0%, #e6f0ff 100%)", boxShadow: "5px 5px 14px rgba(0,77,246,0.15), -4px -4px 10px rgba(255,255,255,1), inset 2px 2px 4px rgba(255,255,255,0.9), inset -1px -1px 3px rgba(0,77,246,0.08)"}}>Close</button>
                 {user && isApplied(user.id, selectedCampaign.id) ? (
                   <button disabled className="px-6 py-2.5 bg-green-100 rounded-lg text-green-700 font-medium cursor-not-allowed">✓ Applied</button>
                 ) : (
-                  <button onClick={handleApply} className="px-6 py-2.5 bg-[#004DF6] rounded-lg text-white font-medium hover:bg-[#0041cc] transition-all">Apply Now</button>
+                  <button onClick={handleApply} className="px-6 py-2.5 rounded-xl text-white font-bold transition-all active:scale-95" style={{background: "linear-gradient(160deg, #2d6fff 0%, #003dd4 100%)", boxShadow: "6px 6px 16px rgba(0,61,212,0.35), -3px -3px 8px rgba(100,150,255,0.25), inset 2px 2px 5px rgba(120,160,255,0.4), inset -2px -2px 5px rgba(0,30,150,0.25)"}}>Apply Now</button>
                 )}
               </DialogFooter>
             </>
