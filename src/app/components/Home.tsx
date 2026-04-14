@@ -103,7 +103,7 @@ export function Home() {
   const CARD_W = 280;
   const GAP = 16;
   const ITEM_W = CARD_W + GAP;
-  const SPEED = 0.03; // px per ms (더 부드러운 속도)
+  const SPEED = 0.05; // px per ms (더 부드러운 속도)
 
   // 에러 핸들러 - useCallback으로 메모이제이션
   const handleVideoError = useCallback((index: number) => {
