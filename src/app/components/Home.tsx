@@ -205,7 +205,7 @@ export function Home() {
   return (
     <div className="bg-white">
       {/* Typography-Centered Hero Section */}
-      <section className="relative min-h-screen overflow-hidden bg-white flex flex-col justify-between pt-20 pb-0">
+      <section className="relative min-h-screen overflow-hidden bg-white flex flex-col justify-between pt-16 pb-0">
         {/* Background Typography Pattern */}
         <div className="absolute inset-0 opacity-[0.08] select-none pointer-events-none flex flex-col justify-around" style={{ overflow: "clip" }}>
           {[
@@ -234,10 +234,10 @@ export function Home() {
           ))}
         </div>
 
-        {/* Main Content - Upper Section */}
-        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 flex-1" style={{maxWidth: '1400px', margin: '0 auto'}}>
-          <div className="flex justify-between items-start gap-8 pt-8">
-            {/* Left Side - Headlines + Description */}
+        {/* Main Content */}
+        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16" style={{maxWidth: '1400px', margin: '0 auto'}}>
+          <div className="flex justify-between items-start gap-8 pt-4">
+            {/* Left Side - Headlines */}
             <div className="flex-shrink-0">
               <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-[1.1] tracking-[-0.02em]">
                 <div className="flex items-baseline gap-1 mb-1">
@@ -253,22 +253,6 @@ export function Home() {
                   <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
                 </div>
               </div>
-
-              {/* OpenSpace is + Description */}
-              <div className="flex flex-row items-center gap-4 pt-4 mt-4">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-baseline gap-2 leading-none">
-                    <span className="font-black tracking-[-0.03em]" style={{fontSize: '2.4rem', lineHeight: 1}}>
-                      <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Space</span>
-                    </span>
-                    <span className="text-xl font-bold text-[#000000]">is...</span>
-                  </div>
-                  <p className="text-base leading-relaxed max-w-xs text-[#000000]">
-                    A next-generation marketplace where creators meet opportunities.{" "}
-                    Browse campaigns, collaborate with brands you love, and get paid for your creativity.
-                  </p>
-                </div>
-              </div>
             </div>
 
             {/* Right Side - Typography Statement */}
@@ -281,26 +265,26 @@ export function Home() {
                 <div className="text-gray-900">WITH</div>
                 <div className="inline-block bg-[#004DF6] text-white px-2">GLOBAL</div>
                 <div className="inline-block bg-[#004DF6] text-white px-2">BRANDS.</div>
-                <div className="text-[#004DF6] mt-4">[ * ]</div>
+                <div className="text-[#004DF6] mt-2">[ * ]</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Section - Characters + Buttons */}
-        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16" style={{maxWidth: '1400px', margin: '0 auto'}}>
+        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 mt-auto" style={{maxWidth: '1400px', margin: '0 auto'}}>
           <div className="flex justify-between items-end">
             {/* Characters - Bottom Left/Center */}
             <div className="flex-1">
               <img
                 src="/characters.png"
                 alt="Creator Characters"
-                className="max-h-[45vh] w-auto object-contain"
+                className="max-h-[50vh] w-auto object-contain"
               />
             </div>
 
             {/* Buttons - Bottom Right */}
-            <div className="flex flex-col gap-4 pb-8">
+            <div className="flex flex-col gap-3 pb-4">
               <button
                 onClick={handleBrowseCampaign}
                 className="px-10 py-4 text-lg font-bold rounded-lg text-white bg-[#004DF6] border-4 border-black hover:bg-[#0041cc] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
