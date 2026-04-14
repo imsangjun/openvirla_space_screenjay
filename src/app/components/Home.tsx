@@ -237,8 +237,8 @@ export function Home() {
         {/* Main Content */}
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 pt-5" style={{maxWidth: '1400px', margin: '0 auto'}}>
           {/* Mobile Layout */}
-          <div className="md:hidden flex flex-col items-start text-left gap-6">
-            {/* Headlines */}
+          <div className="md:hidden flex flex-col items-start gap-4">
+            {/* Headlines - 왼쪽 정렬 */}
             <div className="font-black text-[10vw] sm:text-4xl leading-[1.1] tracking-[-0.02em]">
               <div className="flex items-baseline justify-start gap-1 mb-1">
                 <span className="inline-block text-gray-900 font-bold">Create</span>
@@ -251,6 +251,19 @@ export function Home() {
               <div className="flex items-baseline justify-start gap-1">
                 <span className="inline-block text-gray-900 font-bold">Go</span>
                 <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
+              </div>
+            </div>
+            {/* OPENSPACE IS 문구 - 오른쪽 정렬, 작은 글씨 */}
+            <div className="w-full text-right">
+              <div className="font-black text-[2.8vw] sm:text-xs leading-tight tracking-[-0.01em] uppercase">
+                <div className="text-gray-900">OPENSPACE IS A</div>
+                <div className="text-gray-900">PLATFORM</div>
+                <div className="text-gray-900">CONNECTING</div>
+                <div className="inline-block bg-[#004DF6] text-white px-1">INFLUENCERS</div>
+                <div className="text-gray-900">WITH</div>
+                <div className="inline-block bg-[#004DF6] text-white px-1">GLOBAL</div>
+                <div className="inline-block bg-[#004DF6] text-white px-1">BRANDS.</div>
+                <div className="text-[#004DF6] mt-1">[ * ]</div>
               </div>
             </div>
           </div>
@@ -277,15 +290,15 @@ export function Home() {
 
             {/* Right Side - Typography Statement */}
             <div className="flex-shrink-0 text-right">
-              <div className="font-black text-base md:text-lg lg:text-xl leading-tight tracking-[-0.01em] uppercase">
+              <div className="font-black text-3xl md:text-4xl lg:text-5xl leading-tight tracking-[-0.02em] uppercase">
                 <div className="text-gray-900">OPENSPACE IS A</div>
                 <div className="text-gray-900">PLATFORM</div>
                 <div className="text-gray-900">CONNECTING</div>
-                <div className="inline-block bg-[#004DF6] text-white px-1.5">INFLUENCERS</div>
+                <div className="inline-block bg-[#004DF6] text-white px-2">INFLUENCERS</div>
                 <div className="text-gray-900">WITH</div>
-                <div className="inline-block bg-[#004DF6] text-white px-1.5">GLOBAL</div>
-                <div className="inline-block bg-[#004DF6] text-white px-1.5">BRANDS.</div>
-                <div className="text-[#004DF6] mt-1">[ * ]</div>
+                <div className="inline-block bg-[#004DF6] text-white px-2">GLOBAL</div>
+                <div className="inline-block bg-[#004DF6] text-white px-2">BRANDS.</div>
+                <div className="text-[#004DF6] mt-2">[ * ]</div>
               </div>
             </div>
           </div>
