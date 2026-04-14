@@ -61,7 +61,17 @@ export function CampaignProvider({ children }: { children: ReactNode }) {
   const [appliedCampaignIds, setAppliedCampaignIds] = useState<number[]>([]);
 
   useEffect(() => {
-    loadCampaigns();
+    // auth 세션 확인 후 로드 (RLS 때문에 auth 초기화 전에 실행하면 빈 배열 반환)
+    supabase.auth.getSession().then(() => {
+      loadCampaigns();
+    });
+
+    // 로그인/로그아웃 시 재로드
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      loadCampaigns();
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const loadCampaigns = async () => {
