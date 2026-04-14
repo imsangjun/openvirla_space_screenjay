@@ -242,21 +242,23 @@ function Footer() {
             <p>인스타그램 : <a href="https://instagram.com/openviral_space" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700 underline">openviral_space</a></p>
             <p>개인정보관리책임자 : 임상준 &nbsp;|&nbsp; 호스팅제공자 : Vercel</p>
           </div>
-          <div className="mt-5 pt-5 border-t border-gray-200 flex items-center gap-4">
-            <button
-              onClick={() => setModal("terms")}
-              className="text-xs text-gray-500 hover:text-gray-800 underline"
-            >
-              이용약관
-            </button>
-            <span className="text-gray-300 text-xs">/</span>
-            <button
-              onClick={() => setModal("privacy")}
-              className="text-xs text-gray-500 hover:text-gray-800 underline"
-            >
-              개인정보처리방침
-            </button>
-            <span className="ml-auto text-xs text-gray-400">© 2026 OpenSpace. All rights reserved.</span>
+          <div className="mt-5 pt-5 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <button
+                onClick={() => setModal("terms")}
+                className="text-xs text-gray-500 hover:text-gray-800 underline text-left"
+              >
+                이용약관
+              </button>
+              <span className="hidden sm:inline text-gray-300 text-xs">/</span>
+              <button
+                onClick={() => setModal("privacy")}
+                className="text-xs text-gray-500 hover:text-gray-800 underline text-left"
+              >
+                개인정보처리방침
+              </button>
+            </div>
+            <span className="sm:ml-auto text-xs text-gray-400">© 2026 OpenSpace. All rights reserved.</span>
           </div>
         </div>
       </footer>
