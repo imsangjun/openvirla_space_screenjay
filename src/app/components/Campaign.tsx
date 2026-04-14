@@ -393,13 +393,13 @@ export function Campaign() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Complete Your Profile First</h2>
             <p className="text-sm text-gray-600 mb-8">
-              Please complete your Creator Profile before applying to campaigns. Brands need to know your content style and capabilities.
+              Please complete your profile before applying to campaigns.
             </p>
             <button
               onClick={() => { setIsProfilePromptOpen(false); navigate("/mypage?section=creator-profile"); }}
               className="w-full mb-3 px-8 py-3 bg-[#004DF6] rounded-xl text-white font-medium hover:bg-[#0041cc] transition-all"
             >
-              Complete Creator Profile
+              Complete Creator Profile & Personal Info.
             </button>
             <button
               onClick={() => setIsProfilePromptOpen(false)}
