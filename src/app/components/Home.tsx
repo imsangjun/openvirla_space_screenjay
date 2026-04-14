@@ -254,7 +254,7 @@ export function Home() {
                 </div>
               </div>
 
-              {/* OpenSpace is + Description + Handshake */}
+              {/* OpenSpace is + Description */}
               <div className="flex flex-row items-center gap-4 pt-4 mt-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-baseline gap-2 leading-none">
@@ -268,11 +268,6 @@ export function Home() {
                     Browse campaigns, collaborate with brands you love, and get paid for your creativity.
                   </p>
                 </div>
-                <img
-                  src="/handshake.png"
-                  alt="Handshake"
-                  className="w-32 h-32 object-contain flex-shrink-0"
-                />
               </div>
             </div>
 
