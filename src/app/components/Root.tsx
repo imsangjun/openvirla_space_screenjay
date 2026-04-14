@@ -220,38 +220,72 @@ export function Root() {
       <Outlet />
 
       {/* Footer */}
+      <Footer />
+    </div>
+  );
+}
+
+function Footer() {
+  const [modal, setModal] = useState<"terms" | "privacy" | null>(null);
+
+  return (
+    <>
       <footer className="bg-gray-50 border-t border-gray-200 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <img src={logo} alt="Logo" className="h-10 w-10" />
-                <span className="font-semibold text-lg text-gray-900">OpenViral</span>
-              </div>
-              <p className="text-gray-600 text-sm">
-                Global viral marketing agency helping brands reach millions through innovative campaigns.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-4">Quick Links</h3>
-              <ul className="space-y-2">
-                <li><Link to="/" className="text-gray-600 hover:text-gray-900 text-sm">Home</Link></li>
-                <li><Link to="/campaign" className="text-gray-600 hover:text-gray-900 text-sm">Campaign</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-4">Contact</h3>
-              <p className="text-gray-600 text-sm">
-                Email: hello@openviral.com<br />
-                Phone: +1 (555) 123-4567
-              </p>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center gap-3 mb-5">
+            <img src="/openviral_logo.png" alt="Logo" className="h-8 w-8" />
+            <span className="font-semibold text-base text-gray-900">OpenViral</span>
           </div>
-          <div className="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
-            © 2026 OpenViral. All rights reserved.
+          <div className="text-xs text-gray-500 space-y-1.5 leading-relaxed">
+            <p>대표자 : 이영민 &nbsp;|&nbsp; 소재지 : 인하대학교 인하드림센터 1관 608호</p>
+            <p>이메일 : <a href="mailto:likkoreaofficial@gmail.com" className="hover:text-gray-700 underline">likkoreaofficial@gmail.com</a></p>
+            <p>인스타그램 : <a href="https://instagram.com/openviral_space" target="_blank" rel="noopener noreferrer" className="hover:text-gray-700 underline">openviral_space</a></p>
+            <p>개인정보관리책임자 : 임상준 &nbsp;|&nbsp; 호스팅제공자 : Vercel</p>
+          </div>
+          <div className="mt-5 pt-5 border-t border-gray-200 flex items-center gap-4">
+            <button
+              onClick={() => setModal("terms")}
+              className="text-xs text-gray-500 hover:text-gray-800 underline"
+            >
+              이용약관
+            </button>
+            <span className="text-gray-300 text-xs">/</span>
+            <button
+              onClick={() => setModal("privacy")}
+              className="text-xs text-gray-500 hover:text-gray-800 underline"
+            >
+              개인정보처리방침
+            </button>
+            <span className="ml-auto text-xs text-gray-400">© 2026 OpenViral. All rights reserved.</span>
           </div>
         </div>
       </footer>
-    </div>
+
+      {/* 팝업 모달 */}
+      {modal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setModal(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-gray-900 mb-4">
+              {modal === "terms" ? "이용약관" : "개인정보처리방침"}
+            </h2>
+            <div className="text-sm text-gray-700 leading-relaxed min-h-[80px]">
+              안녕하세요
+            </div>
+            <button
+              onClick={() => setModal(null)}
+              className="mt-6 w-full py-2.5 bg-[#004DF6] text-white text-sm font-semibold rounded-xl hover:bg-[#0041cc] transition-all"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
