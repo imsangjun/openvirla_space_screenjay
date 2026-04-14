@@ -309,11 +309,11 @@ export function MyPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                  <Field icon={<User className="w-4 h-4" />} label="Full Name">
+                  <Field icon={<User className="w-4 h-4" />} label="Full Name" required>
                     <input type="text" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                       placeholder="Jane Doe" className={inputCls} />
                   </Field>
-                  <Field icon={<Phone className="w-4 h-4" />} label="Phone Number">
+                  <Field icon={<Phone className="w-4 h-4" />} label="Phone Number" required>
                     <input type="tel" value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
                       placeholder="+82 10-0000-0000" className={inputCls} />
                   </Field>
@@ -325,18 +325,18 @@ export function MyPage() {
                     <input type="text" value={form.telegramId} onChange={(e) => setForm({ ...form, telegramId: e.target.value })}
                       placeholder="@username" className={inputCls} />
                   </Field>
-                  <Field icon={<Calendar className="w-4 h-4" />} label="Birth Year">
+                  <Field icon={<Calendar className="w-4 h-4" />} label="Birth Year" required>
                     <input type="number" value={form.birthYear} onChange={(e) => setForm({ ...form, birthYear: e.target.value })}
                       placeholder="1995" min="1900" max="2010" className={inputCls} />
                   </Field>
-                  <Field icon={<Globe className="w-4 h-4" />} label="Nationality">
+                  <Field icon={<Globe className="w-4 h-4" />} label="Nationality" required>
                     <select value={form.nationality} onChange={(e) => setForm({ ...form, nationality: e.target.value })} className={inputCls}>
                       <option value="">Select</option>
                       {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
                     </select>
                   </Field>
                   <div className="md:col-span-2">
-                    <Field icon={<Globe className="w-4 h-4" />} label="Country / Location">
+                    <Field icon={<Globe className="w-4 h-4" />} label="Country / Location" required>
                       <select value={form.countryLocation} onChange={(e) => setForm({ ...form, countryLocation: e.target.value })} className={inputCls}>
                         <option value="">Select</option>
                         {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -377,7 +377,7 @@ export function MyPage() {
                       <div className="flex-1 h-px bg-gray-100" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                      <Field icon={<Instagram className="w-4 h-4 text-pink-500" />} label="Instagram">
+                      <Field icon={<Instagram className="w-4 h-4 text-pink-500" />} label="Instagram" required>
                         <input type="url" value={form.instagramLink} onChange={(e) => setForm({ ...form, instagramLink: e.target.value })}
                           placeholder="https://instagram.com/username" className={inputCls} />
                       </Field>
@@ -401,7 +401,7 @@ export function MyPage() {
                   {/* Q1: Content Specialty */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-1">
-                      Q1. What type of content do you specialize in?
+                      Q1. What type of content do you specialize in?<span className="text-red-500 ml-0.5">*</span>
                     </label>
                     <p className="text-xs text-gray-400 mb-3">Select all that apply</p>
                     <div className="flex flex-wrap gap-2">
@@ -445,7 +445,7 @@ export function MyPage() {
                   {/* Q2: Strongest Point */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-1">
-                      Q2. What is your strongest point as a creator?
+                      Q2. What is your strongest point as a creator?<span className="text-red-500 ml-0.5">*</span>
                     </label>
                     <p className="text-xs text-gray-400 mb-3">Select all that apply</p>
                     <div className="flex flex-wrap gap-2">
@@ -489,7 +489,7 @@ export function MyPage() {
                   {/* Q3: Shoot Formats (multi-select) */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-1">
-                      Q3. Are you able to shoot in the following formats?
+                      Q3. Are you able to shoot in the following formats?<span className="text-red-500 ml-0.5">*</span>
                     </label>
                     <p className="text-xs text-gray-400 mb-3">Select all that apply</p>
                     <div className="flex flex-wrap gap-2">
@@ -524,7 +524,7 @@ export function MyPage() {
                   {/* Q4: Equipment */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-800 mb-1">
-                      Q4. Equipment you use
+                      Q4. Equipment you use<span className="text-red-500 ml-0.5">*</span>
                     </label>
                     <p className="text-xs text-gray-400 mb-3">e.g. iPhone 15, DSLR, lighting, mic, etc.</p>
                     <textarea
@@ -704,11 +704,11 @@ export function MyPage() {
 // ── Helper Components ──
 const inputCls = "w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#004DF6] focus:ring-2 focus:ring-[#004DF6]/15 bg-gray-50 transition-all";
 
-function Field({ icon, label, children, fullWidth }: { icon: React.ReactNode; label: string; children: React.ReactNode; fullWidth?: boolean }) {
+function Field({ icon, label, children, fullWidth, required }: { icon: React.ReactNode; label: string; children: React.ReactNode; fullWidth?: boolean; required?: boolean }) {
   return (
     <div className={fullWidth ? "col-span-2" : ""}>
       <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">
-        {icon} {label}
+        {icon} {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
     </div>
