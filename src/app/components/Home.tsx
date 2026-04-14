@@ -208,7 +208,7 @@ export function Home() {
   return (
     <div className="bg-white">
       {/* Typography-Centered Hero Section */}
-      <section className="relative min-h-screen overflow-hidden bg-white flex flex-col pt-0 pb-0">
+      <section className="relative overflow-hidden bg-white flex flex-col pt-0 pb-0 min-h-screen md:min-h-screen">
         {/* Background Typography Pattern */}
         <div className="absolute inset-0 opacity-[0.08] select-none pointer-events-none flex flex-col justify-around" style={{ overflow: "clip" }}>
           {[
@@ -260,7 +260,7 @@ export function Home() {
               </div>
               {/* OPENSPACE IS - Go Viral 아래, 오른쪽 끝 정렬 */}
               <div className="text-right mt-1" style={{maxWidth: '320px', marginLeft: 'auto', marginRight: 0}}>
-                <div className="font-black text-[3vw] leading-[1.4] tracking-[-0.01em] uppercase">
+                <div className="font-black text-[5vw] leading-[1.4] tracking-[-0.01em] uppercase">
                   <div className="text-gray-900">OPENSPACE IS A</div>
                   <div className="text-gray-900">PLATFORM</div>
                   <div className="text-gray-900">CONNECTING</div>
@@ -311,7 +311,7 @@ export function Home() {
         </div>
 
         {/* Bottom Section - Characters + Buttons */}
-        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 mt-auto mx-auto" style={{maxWidth: '1400px'}}>
+        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 md:mt-auto mx-auto" style={{maxWidth: '1400px'}}>
           {/* Mobile Layout - Stacked vertically */}
           <div className="md:hidden flex flex-col items-center pb-8">
             {/* Characters + Browse Campaigns - 붙어있게 */}
