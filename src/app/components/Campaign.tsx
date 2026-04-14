@@ -303,6 +303,7 @@ export function Campaign() {
                     ))}
                   </div>
                   <span className="px-3 py-1 rounded-lg text-sm font-semibold bg-[#e6f0ff] text-[#004DF6]">{selectedCampaign.type}</span>
+                  {selectedCampaign.featured && <span className="px-3 py-1 rounded-lg text-sm font-semibold bg-[#004DF6] text-white">⚡ Featured & Urgent</span>}
                   <div className="flex items-center gap-1.5 text-sm text-orange-600">
                     <Clock className="w-4 h-4" />
                     <span className="font-medium">{selectedCampaign.daysLeft} {selectedCampaign.daysLeft === 1 ? "day" : "days"} left</span>
