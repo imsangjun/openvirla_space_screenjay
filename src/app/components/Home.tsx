@@ -236,7 +236,27 @@ export function Home() {
 
         {/* Main Content */}
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 pt-5" style={{maxWidth: '1400px', margin: '0 auto'}}>
-          <div className="flex justify-between items-start gap-8">
+          {/* Mobile Layout */}
+          <div className="md:hidden flex flex-col items-center text-center gap-6">
+            {/* Headlines */}
+            <div className="font-black text-[10vw] sm:text-4xl leading-[1.1] tracking-[-0.02em]">
+              <div className="flex items-baseline justify-center gap-1 mb-1">
+                <span className="inline-block text-gray-900 font-bold">Create</span>
+                <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Content.</span>
+              </div>
+              <div className="flex items-baseline justify-center gap-1 mb-1">
+                <span className="inline-block text-gray-900 font-bold">Earn</span>
+                <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Money.</span>
+              </div>
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="inline-block text-gray-900 font-bold">Go</span>
+                <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex justify-between items-start gap-8">
             {/* Left Side - Headlines */}
             <div className="flex-shrink-0">
               <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-[1.1] tracking-[-0.02em]">
@@ -273,7 +293,36 @@ export function Home() {
 
         {/* Bottom Section - Characters + Buttons */}
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 mt-auto mx-auto" style={{maxWidth: '1400px'}}>
-          <div className="flex justify-between items-end">
+          {/* Mobile Layout - Stacked vertically */}
+          <div className="md:hidden flex flex-col items-center gap-6 pb-8">
+            {/* Characters */}
+            <div className="w-full flex justify-center">
+              <img
+                src="/characters.svg"
+                alt="Creator Characters"
+                className="max-h-[35vh] w-auto object-contain"
+              />
+            </div>
+
+            {/* Buttons - Full width on mobile */}
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              <button
+                onClick={handleBrowseCampaign}
+                className="w-full px-6 py-3.5 text-base font-bold rounded-lg text-white bg-[#004DF6] border-4 border-black hover:bg-[#0041cc] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
+              >
+                Browse Campaigns
+              </button>
+              <button
+                onClick={handleJoinNow}
+                className="w-full px-6 py-3.5 text-base font-bold rounded-lg text-black bg-white border-4 border-black hover:bg-gray-100 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
+              >
+                Join Now
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop Layout - Side by side */}
+          <div className="hidden md:flex justify-between items-end">
             {/* Characters - Bottom Left/Center */}
             <div className="flex-1" style={{minWidth: 0}}>
               <img
