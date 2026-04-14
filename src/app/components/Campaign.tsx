@@ -157,13 +157,13 @@ export function Campaign() {
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                               <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 flex gap-1">
                                 {offer.platforms.slice(0, 2).map((p) => (
-                                  <div key={p} className="w-4 h-4 md:w-6 md:h-6 bg-[#004DF6]/60 backdrop-blur-md rounded flex items-center justify-center text-white shadow-lg">
+                                  <div key={p} className="w-4 h-4 md:w-6 md:h-6 bg-[#004DF6] rounded flex items-center justify-center text-white shadow-lg">
                                     <PlatformIcon platform={p} />
                                   </div>
                                 ))}
                               </div>
                               <div className="absolute top-1.5 md:top-2 right-1.5 md:right-2">
-                                <span className="inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-[#004DF6]/60 backdrop-blur-md text-white shadow-lg">{offer.type}</span>
+                                <span className="inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-[#004DF6] text-white shadow-lg">{offer.type}</span>
                               </div>
                             </div>
                             <div className="p-2 md:p-3">
@@ -248,13 +248,13 @@ export function Campaign() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                       <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 flex gap-1">
                         {offer.platforms.slice(0, 2).map((p) => (
-                          <div key={p} className="w-4 h-4 md:w-6 md:h-6 bg-[#004DF6]/60 backdrop-blur-md rounded flex items-center justify-center text-white shadow-lg">
+                          <div key={p} className="w-4 h-4 md:w-6 md:h-6 bg-[#004DF6] rounded flex items-center justify-center text-white shadow-lg">
                             <PlatformIcon platform={p} />
                           </div>
                         ))}
                       </div>
                       <div className="absolute top-1.5 md:top-2 right-1.5 md:right-2">
-                        <span className="inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-[#004DF6]/60 backdrop-blur-md text-white shadow-lg">{offer.type}</span>
+                        <span className="inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-[#004DF6] text-white shadow-lg">{offer.type}</span>
                       </div>
                       {offer.featured && (
                         <div className="absolute bottom-1.5 md:bottom-2 left-1.5 md:left-2">
