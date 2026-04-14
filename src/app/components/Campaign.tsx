@@ -346,7 +346,7 @@ export function Campaign() {
                 </div>
               </div>
               <DialogFooter className="mt-6">
-                <button onClick={() => setIsDialogOpen(false)} className="px-6 py-2.5 rounded-xl text-gray-600 font-semibold transition-all active:scale-95" style={{background: "linear-gradient(160deg, #f0f4ff 0%, #e6f0ff 100%)", boxShadow: "5px 5px 14px rgba(0,77,246,0.15), -4px -4px 10px rgba(255,255,255,1), inset 2px 2px 4px rgba(255,255,255,0.9), inset -1px -1px 3px rgba(0,77,246,0.08)"}}>Close</button>
+                <button onClick={() => setIsDialogOpen(false)} className="px-6 py-2.5 rounded-xl text-gray-600 font-semibold transition-all active:scale-95" style={{background: "linear-gradient(160deg, #f5f5f7 0%, #e8e8ec 100%)", boxShadow: "5px 5px 14px rgba(0,0,0,0.12), -4px -4px 10px rgba(255,255,255,1), inset 2px 2px 4px rgba(255,255,255,0.9), inset -1px -1px 3px rgba(0,0,0,0.06)"}}>Close</button>
                 {user && isApplied(user.id, selectedCampaign.id) ? (
                   <button disabled className="px-6 py-2.5 bg-green-100 rounded-lg text-green-700 font-medium cursor-not-allowed">✓ Applied</button>
                 ) : (
