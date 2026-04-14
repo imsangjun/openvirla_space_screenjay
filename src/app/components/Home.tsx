@@ -205,7 +205,7 @@ export function Home() {
   return (
     <div className="bg-white">
       {/* Typography-Centered Hero Section */}
-      <section className="relative min-h-screen overflow-hidden bg-white flex flex-col justify-between pt-16 pb-0">
+      <section className="relative min-h-screen overflow-hidden bg-white flex flex-col justify-between pt-12 pb-0">
         {/* Background Typography Pattern */}
         <div className="absolute inset-0 opacity-[0.08] select-none pointer-events-none flex flex-col justify-around" style={{ overflow: "clip" }}>
           {[
@@ -236,7 +236,7 @@ export function Home() {
 
         {/* Main Content */}
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16" style={{maxWidth: '1400px', margin: '0 auto'}}>
-          <div className="flex justify-between items-start gap-8 pt-4">
+          <div className="flex justify-between items-start gap-8 pt-2">
             {/* Left Side - Headlines */}
             <div className="flex-shrink-0">
               <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-[1.1] tracking-[-0.02em]">
