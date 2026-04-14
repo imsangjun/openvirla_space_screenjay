@@ -156,15 +156,15 @@ export function MyPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f7fb]">
-      <div className="max-w-5xl mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Page</h1>
-          <p className="text-gray-500 mt-1 text-sm">Manage your account information</p>
+      <div className="max-w-5xl mx-auto px-4 py-6 md:py-12">
+        <div className="mb-4 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Page</h1>
+          <p className="text-gray-500 mt-1 text-xs md:text-sm">Manage your account information</p>
         </div>
 
-        <div className="flex gap-6">
-          {/* Sidebar */}
-          <aside className="w-56 flex-shrink-0">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+          {/* Sidebar - Desktop */}
+          <aside className="hidden md:block w-56 flex-shrink-0">
             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm mb-4 text-center">
               <div className="w-16 h-16 rounded-full bg-[#004DF6] flex items-center justify-center text-white text-2xl font-bold overflow-hidden mx-auto mb-3 ring-4 ring-[#004DF6]/10">
                 {avatarPreview ? (
@@ -204,16 +204,58 @@ export function MyPage() {
             </nav>
           </aside>
 
+          {/* Mobile Navigation - Horizontal Tabs */}
+          <div className="md:hidden">
+            {/* User Info Card - Compact */}
+            <div className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm mb-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#004DF6] flex items-center justify-center text-white text-lg font-bold overflow-hidden ring-2 ring-[#004DF6]/10">
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  user.name.charAt(0).toUpperCase()
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 text-sm truncate">{user.name}</p>
+                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              </div>
+            </div>
+
+            {/* Horizontal scrollable tabs */}
+            <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 mb-4">
+              <div className="flex gap-2 pb-1">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveSection(item.id)}
+                    className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      activeSection === item.id
+                        ? item.danger
+                          ? "bg-red-500 text-white"
+                          : "bg-[#004DF6] text-white"
+                        : item.danger
+                        ? "bg-red-50 text-red-500"
+                        : "bg-white text-gray-600 border border-gray-200"
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="whitespace-nowrap">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Main Content */}
           <main className="flex-1 min-w-0">
 
             {/* ── Profile Photo ── */}
             {activeSection === "profile-photo" && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Change Profile Photo</h2>
-                <div className="flex flex-col items-center gap-6">
+              <div className="bg-white rounded-xl md:rounded-2xl border border-gray-100 shadow-sm p-5 md:p-8">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Change Profile Photo</h2>
+                <div className="flex flex-col items-center gap-4 md:gap-6">
                   <div className="relative">
-                    <div className="w-32 h-32 rounded-full bg-[#004DF6] flex items-center justify-center text-white text-5xl font-bold overflow-hidden ring-4 ring-[#004DF6]/10 shadow-xl">
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-[#004DF6] flex items-center justify-center text-white text-4xl md:text-5xl font-bold overflow-hidden ring-4 ring-[#004DF6]/10 shadow-xl">
                       {avatarPreview ? (
                         <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
                       ) : (
@@ -222,7 +264,7 @@ export function MyPage() {
                     </div>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="absolute bottom-1 right-1 w-9 h-9 bg-[#004DF6] rounded-full flex items-center justify-center text-white shadow-lg hover:bg-[#0041cc] transition-all"
+                      className="absolute bottom-1 right-1 w-8 h-8 md:w-9 md:h-9 bg-[#004DF6] rounded-full flex items-center justify-center text-white shadow-lg hover:bg-[#0041cc] transition-all"
                     >
                       <Camera className="w-4 h-4" />
                     </button>
@@ -231,7 +273,7 @@ export function MyPage() {
                   <div className="text-center">
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="px-6 py-2.5 bg-[#004DF6] text-white rounded-xl text-sm font-semibold hover:bg-[#0041cc] transition-all shadow-[0_4px_12px_rgba(0,77,246,0.3)]"
+                      className="px-5 md:px-6 py-2.5 bg-[#004DF6] text-white rounded-xl text-sm font-semibold hover:bg-[#0041cc] transition-all shadow-[0_4px_12px_rgba(0,77,246,0.3)]"
                     >
                       Upload Photo
                     </button>
@@ -251,22 +293,22 @@ export function MyPage() {
 
             {/* ── Personal Info ── */}
             {activeSection === "personal-info" && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900">Personal Info</h2>
+              <div className="bg-white rounded-xl md:rounded-2xl border border-gray-100 shadow-sm p-5 md:p-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5 md:mb-6">
+                  <h2 className="text-lg md:text-xl font-bold text-gray-900">Personal Info</h2>
                   <button
                     onClick={handleSaveProfile}
-                    className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    className={`flex items-center justify-center gap-2 px-4 md:px-5 py-2 rounded-xl text-sm font-semibold transition-all w-full md:w-auto ${
                       saved
                         ? "bg-green-500 text-white"
                         : "bg-[#004DF6] text-white hover:bg-[#0041cc] shadow-[0_4px_12px_rgba(0,77,246,0.3)]"
                     }`}
                   >
-                    {saved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Changes</>}
+                    {saved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save</>}
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                   <Field icon={<User className="w-4 h-4" />} label="Full Name">
                     <input type="text" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                       placeholder="Jane Doe" className={inputCls} />
@@ -293,47 +335,48 @@ export function MyPage() {
                       {NATIONALITIES.map((n) => <option key={n} value={n}>{n}</option>)}
                     </select>
                   </Field>
-                  <Field icon={<Globe className="w-4 h-4" />} label="Country / Location" fullWidth>
-                    <select value={form.countryLocation} onChange={(e) => setForm({ ...form, countryLocation: e.target.value })} className={inputCls}>
-                      <option value="">Select</option>
-                      {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </Field>
-
+                  <div className="md:col-span-2">
+                    <Field icon={<Globe className="w-4 h-4" />} label="Country / Location">
+                      <select value={form.countryLocation} onChange={(e) => setForm({ ...form, countryLocation: e.target.value })} className={inputCls}>
+                        <option value="">Select</option>
+                        {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </Field>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* ── Creator Profile ── */}
             {activeSection === "creator-profile" && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-                <div className="flex items-center justify-between mb-6">
+              <div className="bg-white rounded-xl md:rounded-2xl border border-gray-100 shadow-sm p-5 md:p-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5 md:mb-6">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Creator Profile</h2>
+                    <h2 className="text-lg md:text-xl font-bold text-gray-900">Creator Profile</h2>
                     <p className="text-xs text-gray-400 mt-0.5">Help brands understand your content style</p>
                   </div>
                   <button
                     onClick={handleSaveProfile}
-                    className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    className={`flex items-center justify-center gap-2 px-4 md:px-5 py-2 rounded-xl text-sm font-semibold transition-all w-full md:w-auto ${
                       saved
                         ? "bg-green-500 text-white"
                         : "bg-[#004DF6] text-white hover:bg-[#0041cc] shadow-[0_4px_12px_rgba(0,77,246,0.3)]"
                     }`}
                   >
-                    {saved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Changes</>}
+                    {saved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save</>}
                   </button>
                 </div>
 
-                <div className="space-y-8">
+                <div className="space-y-6 md:space-y-8">
 
                   {/* SNS Profile Links */}
                   <div>
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-3 mb-3 md:mb-4">
                       <div className="flex-1 h-px bg-gray-100" />
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">SNS Profile Links</span>
+                      <span className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-widest whitespace-nowrap">SNS Links</span>
                       <div className="flex-1 h-px bg-gray-100" />
                     </div>
-                    <div className="grid grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
                       <Field icon={<Instagram className="w-4 h-4 text-pink-500" />} label="Instagram">
                         <input type="url" value={form.instagramLink} onChange={(e) => setForm({ ...form, instagramLink: e.target.value })}
                           placeholder="https://instagram.com/username" className={inputCls} />
@@ -499,46 +542,52 @@ export function MyPage() {
 
             {/* ── Active Campaigns ── */}
             {activeSection === "campaigns" && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Active Campaigns</h2>
+              <div className="bg-white rounded-xl md:rounded-2xl border border-gray-100 shadow-sm p-5 md:p-8">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">Active Campaigns</h2>
                 {activeCampaigns.length === 0 ? (
-                  <div className="text-center py-16 text-gray-400">
-                    <Clock className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                  <div className="text-center py-12 md:py-16 text-gray-400">
+                    <Clock className="w-8 h-8 md:w-10 md:h-10 mx-auto mb-3 opacity-30" />
                     <p className="text-sm">No active campaigns at the moment.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 md:space-y-4">
                     {activeCampaigns.map((campaign) => (
-                      <div key={campaign.id} className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-[#004DF6]/20 hover:bg-[#f8faff] transition-all">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
-                          <img src={campaign.image} alt={campaign.title} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-500 mb-0.5">{campaign.company}</p>
-                          <h3 className="text-sm font-bold text-gray-900 truncate">{campaign.title}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className={`px-2 py-0.5 text-xs font-medium rounded-lg ${campaign.type === "Product" ? "bg-purple-50 text-purple-700" : "bg-emerald-50 text-emerald-700"}`}>
-                              {campaign.type}
-                            </span>
-                            <span className="flex items-center gap-1 text-xs text-orange-500 font-medium">
-                              <Clock className="w-3 h-3" /> {campaign.daysLeft} days left
-                            </span>
+                      <div key={campaign.id} className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl border border-gray-100 hover:border-[#004DF6]/20 hover:bg-[#f8faff] transition-all">
+                        {/* Mobile: Image + Info row */}
+                        <div className="flex items-start gap-3 md:contents">
+                          <div className="w-14 h-14 md:w-16 md:h-16 rounded-lg md:rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+                            <img src={campaign.image} alt={campaign.title} className="w-full h-full object-cover" />
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] md:text-xs text-gray-500 mb-0.5">{campaign.company}</p>
+                            <h3 className="text-xs md:text-sm font-bold text-gray-900 line-clamp-2 md:truncate">{campaign.title}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`px-1.5 md:px-2 py-0.5 text-[10px] md:text-xs font-medium rounded-lg ${campaign.type === "Product" ? "bg-purple-50 text-purple-700" : "bg-emerald-50 text-emerald-700"}`}>
+                                {campaign.type}
+                              </span>
+                              <span className="flex items-center gap-1 text-[10px] md:text-xs text-orange-500 font-medium">
+                                <Clock className="w-2.5 h-2.5 md:w-3 md:h-3" /> {campaign.daysLeft}d
+                              </span>
+                            </div>
+                          </div>
+                          {/* Desktop only: payment */}
+                          <span className="hidden md:block text-sm font-bold text-[#004DF6] flex-shrink-0">{campaign.payment}</span>
                         </div>
-                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                          <span className="text-sm font-bold text-[#004DF6]">{campaign.payment}</span>
+                        
+                        {/* Mobile: Action row */}
+                        <div className="flex items-center justify-between md:flex-col md:items-end gap-2 flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-gray-100">
+                          <span className="md:hidden text-xs font-bold text-[#004DF6]">{campaign.payment}</span>
                           {cancelConfirmId === campaign.id ? (
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-gray-500">Cancel application?</span>
                               <button
                                 onClick={() => handleCancelCampaign(campaign.id)}
-                                className="px-3 py-1 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+                                className="px-2.5 md:px-3 py-1 text-[10px] md:text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
                               >
                                 Confirm
                               </button>
                               <button
                                 onClick={() => setCancelConfirmId(null)}
-                                className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all"
+                                className="px-2.5 md:px-3 py-1 text-[10px] md:text-xs font-semibold bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all"
                               >
                                 Keep
                               </button>
@@ -546,9 +595,9 @@ export function MyPage() {
                           ) : (
                             <button
                               onClick={() => setCancelConfirmId(campaign.id)}
-                              className="px-3 py-1 text-xs font-semibold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-all"
+                              className="px-2.5 md:px-3 py-1 text-[10px] md:text-xs font-semibold text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-all"
                             >
-                              Cancel Application
+                              Cancel
                             </button>
                           )}
                         </div>
@@ -562,21 +611,21 @@ export function MyPage() {
 
             {/* ── Log Out ── */}
             {activeSection === "logout" && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Log Out</h2>
-                <p className="text-gray-500 text-sm mb-8">You will be logged out of your account. You can log back in at any time.</p>
-                <div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100 mb-8">
-                  <div className="w-12 h-12 rounded-full bg-[#004DF6] flex items-center justify-center text-white font-bold text-lg overflow-hidden">
+              <div className="bg-white rounded-xl md:rounded-2xl border border-gray-100 shadow-sm p-5 md:p-8">
+                <h2 className="text-lg md:text-xl font-bold text-gray-900 mb-2">Log Out</h2>
+                <p className="text-gray-500 text-xs md:text-sm mb-6 md:mb-8">You will be logged out of your account. You can log back in at any time.</p>
+                <div className="flex items-center gap-3 md:gap-4 p-4 md:p-5 bg-gray-50 rounded-xl md:rounded-2xl border border-gray-100 mb-6 md:mb-8">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#004DF6] flex items-center justify-center text-white font-bold text-base md:text-lg overflow-hidden">
                     {avatarPreview ? <img src={avatarPreview} alt="" className="w-full h-full object-cover" /> : user.name.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{user.name}</p>
-                    <p className="text-sm text-gray-500">{user.email}</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm md:text-base truncate">{user.name}</p>
+                    <p className="text-xs md:text-sm text-gray-500 truncate">{user.email}</p>
                   </div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-700 transition-all"
+                  className="flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-700 transition-all"
                 >
                   <LogOut className="w-4 h-4" />
                   Log Out
@@ -586,18 +635,18 @@ export function MyPage() {
 
             {/* ── Delete Account ── */}
             {activeSection === "delete" && (
-              <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-8">
+              <div className="bg-white rounded-xl md:rounded-2xl border border-red-100 shadow-sm p-5 md:p-8">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
-                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-red-100 flex items-center justify-center">
+                    <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900">Delete Account</h2>
+                  <h2 className="text-lg md:text-xl font-bold text-gray-900">Delete Account</h2>
                 </div>
-                <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                <p className="text-gray-500 text-xs md:text-sm mb-4 md:mb-6 leading-relaxed">
                   Deleting your account will permanently remove all your <span className="text-red-500 font-semibold">account data and campaign history</span>. This action cannot be undone.
                 </p>
-                <div className="bg-red-50 rounded-xl p-4 border border-red-100 mb-6">
-                  <ul className="space-y-1.5 text-sm text-red-700">
+                <div className="bg-red-50 rounded-lg md:rounded-xl p-3 md:p-4 border border-red-100 mb-4 md:mb-6">
+                  <ul className="space-y-1.5 text-xs md:text-sm text-red-700">
                     <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" /> All personal data deleted</li>
                     <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" /> Campaign history deleted</li>
                     <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" /> Cannot be recovered</li>
@@ -606,15 +655,15 @@ export function MyPage() {
                 {!deleteConfirm ? (
                   <button
                     onClick={() => setDeleteConfirm(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all"
+                    className="flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete Account Proceed
+                    Delete Account
                   </button>
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-2">
                         To confirm, type <span className="text-red-500 font-bold">DELETE</span> below
                       </label>
                       <input
@@ -625,11 +674,11 @@ export function MyPage() {
                         className="w-full px-4 py-2.5 border-2 border-red-200 rounded-xl text-sm focus:outline-none focus:border-red-400 transition-all bg-red-50/50"
                       />
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-3">
                       <button
                         onClick={handleDeleteAccount}
                         disabled={deleteInput !== "DELETE"}
-                        className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <Trash2 className="w-4 h-4" />
                         Confirm Delete
