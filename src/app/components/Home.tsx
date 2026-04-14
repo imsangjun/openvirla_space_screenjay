@@ -280,12 +280,7 @@ export function Home() {
                 <div className="inline-block bg-[#004DF6] text-white px-2">INFLUENCERS</div>
                 <div className="text-gray-900">WITH</div>
                 <div className="inline-block bg-[#004DF6] text-white px-2">GLOBAL</div>
-                <div className="inline-block bg-[#004DF6] text-white px-2">BRANDS,</div>
-                <div className="text-gray-900">CREATING</div>
-                <div className="text-gray-900">AUTHENTIC</div>
-                <div className="text-gray-900">CONTENT THAT</div>
-                <div className="text-gray-900">DRIVES</div>
-                <div className="text-gray-900">ENGAGEMENT.</div>
+                <div className="inline-block bg-[#004DF6] text-white px-2">BRANDS.</div>
                 <div className="text-[#004DF6] mt-4">[ * ]</div>
               </div>
             </div>
