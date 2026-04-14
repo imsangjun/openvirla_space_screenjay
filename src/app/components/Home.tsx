@@ -1,7 +1,75 @@
 import { useNavigate } from "react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, memo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
+
+// 비디오 카드 컴포넌트 - memo로 불필요한 리렌더링 방지
+const VideoCard = memo(({ 
+  url, 
+  index, 
+  isActive, 
+  hasError, 
+  onError, 
+  onLoaded 
+}: { 
+  url: string; 
+  index: number; 
+  isActive: boolean; 
+  hasError: boolean;
+  onError: (index: number) => void;
+  onLoaded: (index: number, video: HTMLVideoElement) => void;
+}) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // 활성 상태에 따라 재생/정지
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || hasError) return;
+
+    if (isActive) {
+      video.play().catch(() => {
+        video.muted = true;
+        video.play().catch(() => {});
+      });
+    } else {
+      video.pause();
+    }
+  }, [isActive, hasError]);
+
+  return (
+    <div
+      className="flex-shrink-0 rounded-2xl overflow-hidden bg-gray-900"
+      style={{
+        width: "280px",
+        height: "497px",
+        opacity: isActive ? 1 : 0.45,
+        filter: isActive ? "none" : "blur(2px)",
+        transform: isActive ? "scale(1.04)" : "scale(0.96)",
+        transition: "opacity 0.3s, filter 0.3s, transform 0.3s",
+      }}
+    >
+      {hasError ? (
+        <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
+          <span>영상을 불러올 수 없습니다</span>
+        </div>
+      ) : (
+        <video
+          ref={videoRef}
+          src={url}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="w-full h-full object-cover pointer-events-none"
+          onError={() => onError(index)}
+          onLoadedData={(e) => onLoaded(index, e.currentTarget)}
+        />
+      )}
+    </div>
+  );
+});
+
+VideoCard.displayName = "VideoCard";
 
 export function Home() {
   const navigate = useNavigate();
@@ -24,108 +92,120 @@ export function Home() {
   const [videoUrls, setVideoUrls] = useState<string[]>([]);
   const [videoErrors, setVideoErrors] = useState<Set<number>>(new Set());
   const [videoLoading, setVideoLoading] = useState(true);
-  const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState(0);
-  const [dragDelta, setDragDelta] = useState(0);
+  
   const animRef = useRef<number>(0);
-  const speedRef = useRef(0.4); // px per frame
   const offsetRef = useRef(0);
-  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
-  const CARD_W = 280; // 9:16 비율 카드 너비
+  const trackRef = useRef<HTMLDivElement>(null);
+  const lastTimeRef = useRef(0);
+  
+  const CARD_W = 280;
   const GAP = 16;
   const ITEM_W = CARD_W + GAP;
+  const SPEED = 0.06; // px per ms - 이 값을 조정하면 속도 변경
 
-  // 비디오 재생 시도 함수
-  const tryPlayVideo = (video: HTMLVideoElement) => {
-    if (video.paused) {
-      video.play().catch((err) => {
-        // Autoplay 실패 시 muted 상태 확인 후 재시도
-        console.warn("Video autoplay failed, retrying muted:", err);
-        video.muted = true;
-        video.play().catch((e) => console.error("Video play failed:", e));
-      });
-    }
-  };
-
-  // 비디오 에러 핸들러
-  const handleVideoError = (index: number, url: string) => {
-    console.error(`Video load error at index ${index}:`, url);
+  // 에러 핸들러
+  const handleVideoError = useCallback((index: number) => {
     setVideoErrors((prev) => new Set(prev).add(index));
-  };
+  }, []);
 
-  // 비디오 로드 성공 핸들러
-  const handleVideoLoaded = (index: number, video: HTMLVideoElement) => {
-    videoRefs.current.set(index, video);
-    tryPlayVideo(video);
-  };
+  // 로드 핸들러
+  const handleVideoLoaded = useCallback((index: number, video: HTMLVideoElement) => {
+    // isActive 상태에서 처리
+  }, []);
 
   useEffect(() => {
-    console.log("HOME EFFECT RUNNING");
-    console.log("SB URL", import.meta.env.VITE_SUPABASE_URL);
-    console.log("SB KEY EXISTS", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
     supabase.from("showcase_videos")
       .select("url, sort_order")
       .order("sort_order", { ascending: true })
       .then(({ data, error }) => {
-        if (error) {
-          console.error("[showcase_videos] fetch error:", error);
-        }
         if (!error && data && data.length > 0) {
-          console.log("[showcase_videos] loaded:", data.map((d) => d.url));
           setVideoUrls(data.map((d) => d.url));
-        } else if (!error) {
-          console.warn("[showcase_videos] no data returned");
         }
         setVideoLoading(false);
       })
-      .catch((e) => { console.error("[showcase_videos] catch:", e); setVideoLoading(false); });
+      .catch(() => setVideoLoading(false));
   }, []);
 
-  // 무한 자동 스크롤
+  // 최적화된 애니메이션 루프
   useEffect(() => {
-    if (videoUrls.length === 0) return;
+    if (videoUrls.length === 0 || !trackRef.current) return;
+    
     const totalW = videoUrls.length * ITEM_W;
-    const tick = () => {
+    
+    const tick = (time: number) => {
+      if (!trackRef.current) return;
+      
       if (!isDragging) {
-        offsetRef.current = (offsetRef.current + speedRef.current) % totalW;
-        setOffset(offsetRef.current);
+        const delta = lastTimeRef.current ? time - lastTimeRef.current : 16;
+        offsetRef.current = (offsetRef.current + SPEED * delta) % totalW;
+        trackRef.current.style.transform = `translateX(-${offsetRef.current}px)`;
       }
+      
+      lastTimeRef.current = time;
       animRef.current = requestAnimationFrame(tick);
     };
+    
     animRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animRef.current);
   }, [videoUrls.length, isDragging]);
 
+  // 활성 인덱스 계산
+  const getActiveIndex = useCallback(() => {
+    if (videoUrls.length === 0) return -1;
+    const viewCenter = offsetRef.current + (typeof window !== "undefined" ? window.innerWidth / 2 : 700);
+    let activeIdx = Math.floor((viewCenter + CARD_W / 2) / ITEM_W) % (videoUrls.length * 2);
+    return activeIdx;
+  }, [videoUrls.length]);
+
   const onMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart(e.clientX);
-    setDragDelta(0);
   };
+  
   const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !trackRef.current) return;
     const delta = dragStart - e.clientX;
-    setDragDelta(delta);
-    offsetRef.current = (offsetRef.current + delta * 0.05);
+    offsetRef.current += delta * 0.5;
+    trackRef.current.style.transform = `translateX(-${offsetRef.current}px)`;
+    setDragStart(e.clientX);
   };
-  const onMouseUp = () => { setIsDragging(false); setDragDelta(0); };
+  
+  const onMouseUp = () => setIsDragging(false);
 
   const onTouchStart = (e: React.TouchEvent) => {
     setIsDragging(true);
     setDragStart(e.touches[0].clientX);
   };
+  
   const onTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !trackRef.current) return;
     const delta = dragStart - e.touches[0].clientX;
-    offsetRef.current = (offsetRef.current + delta * 0.05);
+    offsetRef.current += delta * 0.5;
+    trackRef.current.style.transform = `translateX(-${offsetRef.current}px)`;
     setDragStart(e.touches[0].clientX);
   };
+  
   const onTouchEnd = () => setIsDragging(false);
+
+  // 활성 인덱스 추적
+  const [activeIndex, setActiveIndex] = useState(-1);
+  
+  useEffect(() => {
+    if (videoUrls.length === 0) return;
+    const interval = setInterval(() => {
+      setActiveIndex(getActiveIndex());
+    }, 500);
+    return () => clearInterval(interval);
+  }, [videoUrls.length, getActiveIndex]);
+
+  const duplicatedVideos = [...videoUrls, ...videoUrls];
 
   return (
     <div className="bg-white">
       {/* Typography-Centered Hero Section */}
-      <section className="relative min-h-screen overflow-hidden bg-white flex items-stretch justify-center pt-20 pb-0">
+      <section className="relative min-h-screen overflow-hidden bg-white flex flex-col justify-between pt-20 pb-0">
         {/* Background Typography Pattern */}
         <div className="absolute inset-0 opacity-[0.08] select-none pointer-events-none flex flex-col justify-around" style={{ overflow: "clip" }}>
           {[
@@ -154,84 +234,95 @@ export function Home() {
           ))}
         </div>
 
-        {/* Main Content */}
-        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 flex" style={{maxWidth: '1100px', margin: '0 auto'}}>
-          <div className="flex justify-between items-stretch gap-6 flex-1">
-            {/* Left Side */}
-            <div className="flex-shrink-0 flex flex-col justify-between pb-0">
-              <div>
-                <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-tight tracking-[-0.02em] divide-y-2 divide-black">
-                  <div className="flex items-baseline gap-1">
-                    <span className="inline-block text-gray-900 py-2 font-bold">Create</span>
-                    <span className="inline-block bg-[#004DF6] text-white px-1.5 border-[3px] border-black font-semibold whitespace-nowrap border-t-[0px] border-r-[0px] border-b-[0px] border-l-[0px]">Content.</span>
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="inline-block text-gray-900 py-2 font-bold">Earn</span>
-                    <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Money.</span>
-                  </div>
-                  <div className="flex items-baseline gap-1 border-b-2 border-black">
-                    <span className="inline-block text-gray-900 py-2 font-bold">Go</span>
-                    <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
-                  </div>
+        {/* Main Content - Upper Section */}
+        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 flex-1" style={{maxWidth: '1400px', margin: '0 auto'}}>
+          <div className="flex justify-between items-start gap-8 pt-8">
+            {/* Left Side - Headlines + Description */}
+            <div className="flex-shrink-0">
+              <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-tight tracking-[-0.02em] divide-y-2 divide-black">
+                <div className="flex items-baseline gap-1">
+                  <span className="inline-block text-gray-900 py-2 font-bold">Create</span>
+                  <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Content.</span>
                 </div>
-
-                {/* OpenSpace is + 텍스트 + 이미지 */}
-                <div className="flex flex-row items-center gap-4 pt-1 mt-0">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-baseline gap-2 leading-none">
-                      <span className="font-black tracking-[-0.03em]" style={{fontSize: '2.4rem', lineHeight: 1}}>
-                        <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Space</span>
-                      </span>
-                      <span className="text-xl font-bold text-[#000000]">is...</span>
-                    </div>
-                    <p className="text-base leading-relaxed max-w-xs text-[#000000]">
-                      A next-generation marketplace where creators meet opportunities.{" "}
-                      Browse campaigns, collaborate with brands you love, and get paid for your creativity.
-                    </p>
-                  </div>
-                  <img
-                    src="/handshake.png"
-                    alt="Handshake"
-                    className="w-52 h-52 object-contain flex-shrink-0"
-                  />
+                <div className="flex items-baseline gap-1">
+                  <span className="inline-block text-gray-900 py-2 font-bold">Earn</span>
+                  <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Money.</span>
+                </div>
+                <div className="flex items-baseline gap-1 border-b-2 border-black">
+                  <span className="inline-block text-gray-900 py-2 font-bold">Go</span>
+                  <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
                 </div>
               </div>
 
-              {/* Character Image */}
-              <div className="relative mt-4 pt-36">
+              {/* OpenSpace is + Description + Handshake */}
+              <div className="flex flex-row items-center gap-4 pt-4 mt-4">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-baseline gap-2 leading-none">
+                    <span className="font-black tracking-[-0.03em]" style={{fontSize: '2.4rem', lineHeight: 1}}>
+                      <span className="text-gray-900 text-[27px]">Open</span><span className="text-[#004DF6] text-[25px]">Space</span>
+                    </span>
+                    <span className="text-xl font-bold text-[#000000]">is...</span>
+                  </div>
+                  <p className="text-base leading-relaxed max-w-xs text-[#000000]">
+                    A next-generation marketplace where creators meet opportunities.{" "}
+                    Browse campaigns, collaborate with brands you love, and get paid for your creativity.
+                  </p>
+                </div>
                 <img
-                  src="/characters.png"
-                  alt="OpenSpace Creators"
-                  className="absolute bottom-0 left-0 w-[480px] object-contain object-bottom pointer-events-none select-none"
-                  style={{ zIndex: 0 }}
+                  src="/handshake.png"
+                  alt="Handshake"
+                  className="w-32 h-32 object-contain flex-shrink-0"
                 />
               </div>
             </div>
 
-            {/* Right Side */}
-            <div className="flex-1 text-right mt-4 md:mt-6 lg:mt-8 pb-12" style={{maxWidth: '520px'}}>
-              <h1 className="text-[clamp(1.6rem,3.5vw,3.2rem)] font-black leading-[1.15] mb-12 text-[#004DF6] uppercase tracking-tight">
-                OpenSpace is a platform connecting <span className="inline bg-[#004DF6] text-white px-1">influencers</span><br />with<br /><span className="inline bg-[#004DF6] text-white px-1">global brands,</span> creating authentic content that drives engagement.
-              </h1>
-
-              <div className="flex items-center justify-end gap-4 mb-16">
-                <div className="text-[#004DF6] font-black text-6xl">[ * ]</div>
+            {/* Right Side - Typography Statement */}
+            <div className="flex-shrink-0 text-right">
+              <div className="font-black text-3xl md:text-4xl lg:text-5xl leading-tight tracking-[-0.02em] uppercase">
+                <div className="text-gray-900">OPENSPACE IS A</div>
+                <div className="text-gray-900">PLATFORM</div>
+                <div className="text-gray-900">CONNECTING</div>
+                <div className="inline-block bg-[#004DF6] text-white px-2">INFLUENCERS</div>
+                <div className="text-gray-900">WITH</div>
+                <div className="inline-block bg-[#004DF6] text-white px-2">GLOBAL</div>
+                <div className="inline-block bg-[#004DF6] text-white px-2">BRANDS,</div>
+                <div className="text-gray-900">CREATING</div>
+                <div className="text-gray-900">AUTHENTIC</div>
+                <div className="text-gray-900">CONTENT THAT</div>
+                <div className="text-gray-900">DRIVES</div>
+                <div className="text-gray-900">ENGAGEMENT.</div>
+                <div className="text-[#004DF6] mt-4">[ * ]</div>
               </div>
+            </div>
+          </div>
+        </div>
 
-              <div className="flex flex-wrap gap-4 justify-end">
-                <button
-                  onClick={handleBrowseCampaign}
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-lg text-white bg-[#004DF6] border-4 border-black hover:bg-[#0041cc] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
-                >
-                  Browse Campaigns
-                </button>
-                <button
-                  onClick={handleJoinNow}
-                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold rounded-lg text-gray-900 bg-white border-4 border-gray-900 hover:bg-gray-50 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
-                >
-                  Join Now
-                </button>
-              </div>
+        {/* Bottom Section - Characters + Buttons */}
+        <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16" style={{maxWidth: '1400px', margin: '0 auto'}}>
+          <div className="flex justify-between items-end">
+            {/* Characters - Bottom Left/Center */}
+            <div className="flex-1">
+              <img
+                src="/characters.png"
+                alt="Creator Characters"
+                className="max-h-[45vh] w-auto object-contain"
+              />
+            </div>
+
+            {/* Buttons - Bottom Right */}
+            <div className="flex flex-col gap-4 pb-8">
+              <button
+                onClick={handleBrowseCampaign}
+                className="px-10 py-4 text-lg font-bold rounded-lg text-white bg-[#004DF6] border-4 border-black hover:bg-[#0041cc] transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
+              >
+                Browse Campaigns
+              </button>
+              <button
+                onClick={handleJoinNow}
+                className="px-10 py-4 text-lg font-bold rounded-lg text-black bg-white border-4 border-black hover:bg-gray-100 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase"
+              >
+                Join Now
+              </button>
             </div>
           </div>
         </div>
@@ -261,7 +352,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* Video Showcase Section - 무한 릴스 캐러셀 */}
+      {/* Video Showcase Section - 최적화된 무한 릴스 캐러셀 */}
       {videoLoading ? (
         <section className="py-16 bg-white overflow-hidden">
           <div className="flex gap-4 px-8">
@@ -272,10 +363,12 @@ export function Home() {
         </section>
       ) : videoUrls.length > 0 && (
         <section className="py-16 bg-white overflow-hidden">
-          {/* 좌우 페이드 마스크 */}
           <div
             className="relative w-full select-none cursor-grab active:cursor-grabbing"
-            style={{ maskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)" }}
+            style={{ 
+              maskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)", 
+              WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%)" 
+            }}
             onMouseDown={onMouseDown}
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUp}
@@ -284,54 +377,29 @@ export function Home() {
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
           >
-            {/* 무한 트랙: 원본 + 복제본 */}
             <div
+              ref={trackRef}
               className="flex"
               style={{
                 gap: "16px",
-                transform: `translateX(-${offset % (videoUrls.length * (280 + 16))}px)`,
                 willChange: "transform",
               }}
             >
-              {[...videoUrls, ...videoUrls, ...videoUrls].map((url, i) => {
-                // 현재 화면 중앙에 가장 가까운 카드를 "활성" 처리
-                const totalW = videoUrls.length * (280 + 16);
-                const cardCenter = i * (280 + 16) + 140;
-                const viewCenter = offset + (typeof window !== "undefined" ? window.innerWidth / 2 : 700);
-                const dist = Math.abs(cardCenter - viewCenter);
-                const isActive = dist < 200;
-                const hasError = videoErrors.has(i);
+              {duplicatedVideos.map((url, i) => {
+                const isActive = Math.abs(i - activeIndex) <= 1 || 
+                  Math.abs(i - activeIndex + duplicatedVideos.length) <= 1 ||
+                  Math.abs(i - activeIndex - duplicatedVideos.length) <= 1;
+                
                 return (
-                  <div
+                  <VideoCard
                     key={i}
-                    className="flex-shrink-0 rounded-2xl overflow-hidden transition-all duration-300 bg-gray-900"
-                    style={{
-                      width: "280px",
-                      height: "497px", // 9:16
-                      opacity: isActive ? 1 : 0.45,
-                      filter: isActive ? "none" : "blur(2px)",
-                      transform: isActive ? "scale(1.04)" : "scale(0.96)",
-                    }}
-                  >
-                    {hasError ? (
-                      <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
-                        <span>영상을 불러올 수 없습니다</span>
-                      </div>
-                    ) : (
-                      <video
-                        src={url}
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        className="w-full h-full object-cover pointer-events-none"
-                        onError={() => handleVideoError(i, url)}
-                        onLoadedData={(e) => handleVideoLoaded(i, e.currentTarget)}
-                        onCanPlay={(e) => tryPlayVideo(e.currentTarget)}
-                      />
-                    )}
-                  </div>
+                    url={url}
+                    index={i}
+                    isActive={isActive}
+                    hasError={videoErrors.has(i)}
+                    onError={handleVideoError}
+                    onLoaded={handleVideoLoaded}
+                  />
                 );
               })}
             </div>
