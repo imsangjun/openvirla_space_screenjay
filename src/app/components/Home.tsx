@@ -103,7 +103,7 @@ export function Home() {
   const CARD_W = 280;
   const GAP = 16;
   const ITEM_W = CARD_W + GAP;
-  const SPEED = 0.03; // px per ms - 이 값을 조정하면 속도 변경
+  const SPEED = typeof window !== "undefined" && window.innerWidth < 768 ? 0.10 : 0.03; // 모바일 빠르게
 
   // 에러 핸들러
   const handleVideoError = useCallback((index: number) => {
