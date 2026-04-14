@@ -257,7 +257,7 @@ export function Home() {
               </div>
               {/* OPENSPACE IS - Go Viral 아래, 오른쪽 끝 정렬 */}
               <div className="text-right mt-1" style={{maxWidth: '320px', marginLeft: 'auto', marginRight: 0}}>
-                <div className="font-black text-[5.2vw] leading-[1.4] tracking-[-0.01em] uppercase">
+                <div className="font-black text-[5vw] leading-[1.4] tracking-[-0.01em] uppercase">
                   <div className="text-gray-900">OPENSPACE IS A</div>
                   <div className="text-gray-900">PLATFORM</div>
                   <div className="text-gray-900">CONNECTING</div>
