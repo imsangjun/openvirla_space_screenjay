@@ -237,33 +237,36 @@ export function Home() {
         {/* Main Content */}
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 pt-5" style={{maxWidth: '1400px', margin: '0 auto'}}>
           {/* Mobile Layout */}
-          <div className="md:hidden flex flex-row items-start justify-between gap-2 w-full overflow-hidden">
-            {/* Headlines - 왼쪽 */}
-            <div className="font-black text-[9vw] leading-[1.1] tracking-[-0.02em]" style={{flexShrink: 0, maxWidth: '62%'}}>
-              <div className="flex items-baseline justify-start gap-1 mb-1">
-                <span className="inline-block text-gray-900 font-bold">Create</span>
-                <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Content.</span>
+          <div className="md:hidden w-full">
+            {/* 헤드라인 왼쪽, OPENSPACE IS 오른쪽 정렬 컨테이너 */}
+            <div className="relative">
+              {/* 헤드라인 - 왼쪽 */}
+              <div className="font-black text-[10vw] leading-[1.1] tracking-[-0.02em]">
+                <div className="flex items-baseline justify-start gap-1 mb-1">
+                  <span className="inline-block text-gray-900 font-bold">Create</span>
+                  <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Content.</span>
+                </div>
+                <div className="flex items-baseline justify-start gap-1 mb-1">
+                  <span className="inline-block text-gray-900 font-bold">Earn</span>
+                  <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Money.</span>
+                </div>
+                <div className="flex items-baseline justify-start gap-1">
+                  <span className="inline-block text-gray-900 font-bold">Go</span>
+                  <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
+                </div>
               </div>
-              <div className="flex items-baseline justify-start gap-1 mb-1">
-                <span className="inline-block text-gray-900 font-bold">Earn</span>
-                <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Money.</span>
-              </div>
-              <div className="flex items-baseline justify-start gap-1">
-                <span className="inline-block text-gray-900 font-bold">Go</span>
-                <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
-              </div>
-            </div>
-            {/* OPENSPACE IS 문구 - 오른쪽 */}
-            <div className="text-right" style={{flexShrink: 0, maxWidth: '35%'}}>
-              <div className="font-black text-[2.8vw] leading-[1.4] tracking-[-0.01em] uppercase">
-                <div className="text-gray-900">OPENSPACE IS A</div>
-                <div className="text-gray-900">PLATFORM</div>
-                <div className="text-gray-900">CONNECTING</div>
-                <div className="inline-block bg-[#004DF6] text-white px-1">INFLUENCERS</div>
-                <div className="text-gray-900">WITH</div>
-                <div className="inline-block bg-[#004DF6] text-white px-1">GLOBAL</div>
-                <div className="inline-block bg-[#004DF6] text-white px-1">BRANDS.</div>
-                <div className="text-[#004DF6] mt-1">[ * ]</div>
+              {/* OPENSPACE IS - Go Viral 아래, 오른쪽 끝 정렬 */}
+              <div className="text-right mt-1" style={{maxWidth: '320px', marginLeft: 'auto', marginRight: 0}}>
+                <div className="font-black text-[3vw] leading-[1.4] tracking-[-0.01em] uppercase">
+                  <div className="text-gray-900">OPENSPACE IS A</div>
+                  <div className="text-gray-900">PLATFORM</div>
+                  <div className="text-gray-900">CONNECTING</div>
+                  <div className="inline-block bg-[#004DF6] text-white px-1">INFLUENCERS</div>
+                  <div className="text-gray-900">WITH</div>
+                  <div className="inline-block bg-[#004DF6] text-white px-1">GLOBAL</div>
+                  <div className="inline-block bg-[#004DF6] text-white px-1">BRANDS.</div>
+                  <div className="text-[#004DF6] mt-1">[ * ]</div>
+                </div>
               </div>
             </div>
           </div>
