@@ -256,9 +256,6 @@ export function Campaign() {
                       <div className="absolute top-1.5 md:top-2 right-1.5 md:right-2">
                         <span className="inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-[#004DF6] text-white shadow-lg">{offer.type}</span>
                       </div>
-                      {offer.featured && (
-
-                      )}
                     </div>
                     <div className="p-2 md:p-3">
                       <div className="flex items-center gap-1 text-[10px] md:text-xs text-[#004DF6] mb-1 md:mb-2">
