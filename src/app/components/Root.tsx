@@ -60,7 +60,7 @@ export function Root() {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 md:gap-3 z-10">
               <img src={logo} alt="Logo" className="h-8 w-8 md:h-12 md:w-12" />
-              <span className="font-semibold text-lg md:text-2xl text-gray-900">OpenViral</span>
+              <span className="text-lg md:text-2xl tracking-[-0.03em]" style={{fontWeight: 600}}><span className="text-gray-900">Open</span><span className="text-[#004DF6]">Space</span></span>
             </Link>
 
             {/* Desktop Navigation Links - Centered */}
@@ -234,7 +234,7 @@ function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3 mb-5">
             <img src="/openviral_logo.png" alt="Logo" className="h-8 w-8" />
-            <span className="font-semibold text-base text-gray-900">OpenViral</span>
+            <span className="text-base tracking-[-0.03em]" style={{fontWeight: 600}}><span className="text-gray-900">Open</span><span className="text-[#004DF6]">Space</span></span>
           </div>
           <div className="text-xs text-gray-500 space-y-1.5 leading-relaxed">
             <p>대표자 : 이영민 &nbsp;|&nbsp; 소재지 : 인하대학교 인하드림센터 1관 608호</p>
@@ -256,7 +256,7 @@ function Footer() {
             >
               개인정보처리방침
             </button>
-            <span className="ml-auto text-xs text-gray-400">© 2026 OpenViral. All rights reserved.</span>
+            <span className="ml-auto text-xs text-gray-400">© 2026 OpenSpace. All rights reserved.</span>
           </div>
         </div>
       </footer>
