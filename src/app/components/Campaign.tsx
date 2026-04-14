@@ -114,21 +114,21 @@ export function Campaign() {
     <div className="bg-white min-h-screen">
 
       {/* Header */}
-      <section className="py-16">
+      <section className="py-8 md:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="font-bold text-gray-900 text-[50px] mb-2">
+          <h1 className="font-bold text-gray-900 text-2xl md:text-[50px] mb-1 md:mb-2">
             Campaign Offers<span className="text-[#004DF6]">.</span>
           </h1>
-          <p className="text-base text-[#7a8594]">Browse and apply for brand collaboration opportunities</p>
+          <p className="text-sm md:text-base text-[#7a8594]">Browse and apply for brand collaboration opportunities</p>
         </div>
       </section>
 
       {/* 로딩 skeleton - campaignsLoading만 체크 (authLoading과 무관하게 캠페인 표시) */}
       {campaignsLoading && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-2xl bg-gray-100 animate-pulse h-64" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-xl md:rounded-2xl bg-gray-100 animate-pulse h-44 md:h-64" />
             ))}
           </div>
         </div>
@@ -139,40 +139,40 @@ export function Campaign() {
         <>
           {/* Featured */}
           {featuredCampaigns.length > 0 && (
-            <section className="py-10 mb-8">
+            <section className="py-6 md:py-10 mb-4 md:mb-8">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-gradient-to-br from-[#f0f4ff] to-[#e6f0ff] rounded-3xl p-8 shadow-[4px_4px_12px_rgba(0,77,246,0.12),-4px_-4px_12px_rgba(255,255,255,0.9),inset_-4px_-4px_16px_rgba(0,77,246,0.15),inset_4px_4px_16px_rgba(255,255,255,1)]">
-                  <h2 className="text-4xl font-bold text-gray-900 flex items-center gap-2 mb-6">
-                    <span className="inline-block w-2 h-2 bg-[#004DF6] rounded-full animate-pulse" />
-                    Featured & Urgent Campaigns
+                <div className="bg-gradient-to-br from-[#f0f4ff] to-[#e6f0ff] rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-[4px_4px_12px_rgba(0,77,246,0.12),-4px_-4px_12px_rgba(255,255,255,0.9),inset_-4px_-4px_16px_rgba(0,77,246,0.15),inset_4px_4px_16px_rgba(255,255,255,1)]">
+                  <h2 className="text-xl md:text-4xl font-bold text-gray-900 flex items-center gap-2 mb-4 md:mb-6">
+                    <span className="inline-block w-1.5 h-1.5 md:w-2 md:h-2 bg-[#004DF6] rounded-full animate-pulse" />
+                    Featured & Urgent
                   </h2>
-                  <div ref={scrollRef} className="relative overflow-x-auto scrollbar-custom pb-6 pt-2 px-2">
-                    <div className="flex gap-6 animate-scroll-left">
+                  <div ref={scrollRef} className="relative overflow-x-auto scrollbar-custom pb-4 md:pb-6 pt-1 md:pt-2 px-1 md:px-2">
+                    <div className="flex gap-3 md:gap-6 animate-scroll-left">
                       {[...Array(3)].map((_, setIndex) =>
                         featuredCampaigns.map((offer) => (
                           <div key={`scroll-${setIndex}-${offer.id}`} onClick={() => handleCardClick(offer)}
-                            className="flex-shrink-0 w-[320px] bg-white/60 backdrop-blur-lg rounded-md border border-white/80 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/80 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
-                            <div className="relative h-40 rounded-t-md overflow-hidden">
+                            className="flex-shrink-0 w-[140px] md:w-[320px] bg-white/60 backdrop-blur-lg rounded-md border border-white/80 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/80 md:hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
+                            <div className="relative h-24 md:h-40 rounded-t-md overflow-hidden">
                               <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                              <div className="absolute top-2 left-2 flex gap-1.5">
-                                {offer.platforms.map((p) => (
-                                  <div key={p} className="w-6 h-6 bg-white/20 backdrop-blur-md rounded flex items-center justify-center text-white border border-white/30 shadow-lg">
+                              <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 flex gap-1">
+                                {offer.platforms.slice(0, 2).map((p) => (
+                                  <div key={p} className="w-4 h-4 md:w-6 md:h-6 bg-white/20 backdrop-blur-md rounded flex items-center justify-center text-white border border-white/30 shadow-lg">
                                     <PlatformIcon platform={p} />
                                   </div>
                                 ))}
                               </div>
-                              <div className="absolute top-2 right-2">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-lg">{offer.type}</span>
+                              <div className="absolute top-1.5 md:top-2 right-1.5 md:right-2">
+                                <span className="inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-lg">{offer.type}</span>
                               </div>
                             </div>
-                            <div className="p-3">
-                              <div className="flex items-center gap-1 text-xs text-orange-600 mb-2">
-                                <Clock className="w-3 h-3" />
-                                <span className="font-semibold">{offer.daysLeft} {offer.daysLeft === 1 ? "day" : "days"} left</span>
+                            <div className="p-2 md:p-3">
+                              <div className="flex items-center gap-1 text-[10px] md:text-xs text-orange-600 mb-1 md:mb-2">
+                                <Clock className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                                <span className="font-semibold">{offer.daysLeft}d left</span>
                               </div>
-                              <div className="text-xs text-gray-500 mb-0.5">{offer.company}</div>
-                              <h3 className="text-sm font-bold text-gray-900 mb-2 line-clamp-2">{offer.title}</h3>
+                              <div className="text-[10px] md:text-xs text-gray-500 mb-0.5 truncate">{offer.company}</div>
+                              <h3 className="text-xs md:text-sm font-bold text-gray-900 line-clamp-2">{offer.title}</h3>
                             </div>
                           </div>
                         ))
@@ -185,70 +185,89 @@ export function Campaign() {
           )}
 
           {/* All Campaigns */}
-          <section className="py-12 mt-8">
+          <section className="py-6 md:py-12 mt-4 md:mt-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">All Campaigns<span className="text-[#004DF6]">.</span></h2>
+              <h2 className="text-xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6">All Campaigns<span className="text-[#004DF6]">.</span></h2>
 
-              {/* Filters */}
-              <div className="space-y-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Category</span>
-                  <div className="flex gap-2">
+              {/* Filters - Mobile Compact */}
+              <div className="space-y-2 md:space-y-4 mb-4 md:mb-6">
+                {/* Mobile: Horizontal scroll filters */}
+                <div className="md:hidden space-y-2">
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                     {categories.map((c) => (
-                      <button key={c} onClick={() => setSelectedCategory(c)} className={selectedCategory === c ? btnActive : btnInactive}>{c}</button>
+                      <button key={c} onClick={() => setSelectedCategory(c)} className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${selectedCategory === c ? "bg-[#004DF6] text-white" : "bg-gray-100 text-gray-700"}`}>{c}</button>
                     ))}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Platform</span>
-                  <div className="flex gap-2">
+                    <span className="w-px bg-gray-300 mx-1" />
                     {platforms.map((p) => (
-                      <button key={p} onClick={() => setSelectedPlatform(p)} className={selectedPlatform === p ? btnActive : btnInactive}>{p}</button>
+                      <button key={p} onClick={() => setSelectedPlatform(p)} className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${selectedPlatform === p ? "bg-[#004DF6] text-white" : "bg-gray-100 text-gray-700"}`}>{p}</button>
                     ))}
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Search</span>
-                  <input type="text" placeholder="Search by title, company, or description..."
+                  <input type="text" placeholder="Search..."
                     value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}
-                    className="flex-1 max-w-md px-4 py-2 rounded-lg border border-gray-200 bg-white/60 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#004DF6] focus:ring-2 focus:ring-[#004DF6]/20 transition-all shadow-[inset_3px_3px_8px_rgba(0,0,0,0.12),inset_-3px_-3px_8px_rgba(255,255,255,0.9),2px_2px_6px_rgba(0,0,0,0.08),-2px_-2px_6px_rgba(255,255,255,0.5)]" />
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#004DF6]" />
+                </div>
+
+                {/* Desktop: Original layout */}
+                <div className="hidden md:block space-y-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Category</span>
+                    <div className="flex gap-2">
+                      {categories.map((c) => (
+                        <button key={c} onClick={() => setSelectedCategory(c)} className={selectedCategory === c ? btnActive : btnInactive}>{c}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Platform</span>
+                    <div className="flex gap-2">
+                      {platforms.map((p) => (
+                        <button key={p} onClick={() => setSelectedPlatform(p)} className={selectedPlatform === p ? btnActive : btnInactive}>{p}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-[#5b6d89] min-w-[80px]">Search</span>
+                    <input type="text" placeholder="Search by title, company, or description..."
+                      value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}
+                      className="flex-1 max-w-md px-4 py-2 rounded-lg border border-gray-200 bg-white/60 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#004DF6] focus:ring-2 focus:ring-[#004DF6]/20 transition-all shadow-[inset_3px_3px_8px_rgba(0,0,0,0.12),inset_-3px_-3px_8px_rgba(255,255,255,0.9),2px_2px_6px_rgba(0,0,0,0.08),-2px_-2px_6px_rgba(255,255,255,0.5)]" />
+                  </div>
                 </div>
               </div>
 
-              {/* Grid */}
-              <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {/* Grid - 2 columns on mobile */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                 {filteredCampaigns.map((offer) => (
                   <div key={offer.id} onClick={() => handleCardClick(offer)}
-                    className="bg-white/40 backdrop-blur-lg rounded-md border border-white/60 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/60 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
-                    <div className="relative h-40 rounded-t-md overflow-hidden">
+                    className="bg-white/40 backdrop-blur-lg rounded-lg md:rounded-md border border-white/60 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,77,246,0.35)] hover:bg-white/60 md:hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg">
+                    <div className="relative h-24 md:h-40 rounded-t-lg md:rounded-t-md overflow-hidden">
                       <ImageWithFallback src={offer.image} alt={offer.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                      <div className="absolute top-2 left-2 flex gap-1.5">
-                        {offer.platforms.map((p) => (
-                          <div key={p} className="w-6 h-6 bg-white/20 backdrop-blur-md rounded flex items-center justify-center text-white border border-white/30 shadow-lg">
+                      <div className="absolute top-1.5 md:top-2 left-1.5 md:left-2 flex gap-1">
+                        {offer.platforms.slice(0, 2).map((p) => (
+                          <div key={p} className="w-4 h-4 md:w-6 md:h-6 bg-white/20 backdrop-blur-md rounded flex items-center justify-center text-white border border-white/30 shadow-lg">
                             <PlatformIcon platform={p} />
                           </div>
                         ))}
                       </div>
-                      <div className="absolute top-2 right-2">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-lg">{offer.type}</span>
+                      <div className="absolute top-1.5 md:top-2 right-1.5 md:right-2">
+                        <span className="inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30 shadow-lg">{offer.type}</span>
                       </div>
                       {offer.featured && (
-                        <div className="absolute bottom-2 left-2">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold bg-[#004DF6]/80 backdrop-blur-md text-white shadow-lg">⚡ Featured</span>
+                        <div className="absolute bottom-1.5 md:bottom-2 left-1.5 md:left-2">
+                          <span className="inline-flex items-center gap-0.5 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-[#004DF6]/80 backdrop-blur-md text-white shadow-lg">⚡</span>
                         </div>
                       )}
                     </div>
-                    <div className="p-3">
-                      <div className="flex items-center gap-1 text-xs text-[#004DF6] mb-2">
-                        <Clock className="w-3 h-3" />
-                        <span className="font-medium">{offer.daysLeft} {offer.daysLeft === 1 ? "day" : "days"} left</span>
+                    <div className="p-2 md:p-3">
+                      <div className="flex items-center gap-1 text-[10px] md:text-xs text-[#004DF6] mb-1 md:mb-2">
+                        <Clock className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                        <span className="font-medium">{offer.daysLeft}d left</span>
                       </div>
-                      <div className="text-xs text-gray-500 mb-0.5">{offer.company}</div>
-                      <h3 className="text-sm font-bold text-gray-900 mb-2 line-clamp-2">{offer.title}</h3>
+                      <div className="text-[10px] md:text-xs text-gray-500 mb-0.5 truncate">{offer.company}</div>
+                      <h3 className="text-xs md:text-sm font-bold text-gray-900 mb-1 md:mb-2 line-clamp-2">{offer.title}</h3>
                       {user && isApplied(user.id, offer.id) && (
-                        <span className="inline-flex items-center gap-1 text-xs text-green-600 font-semibold">
-                          <CheckCircle className="w-3 h-3" /> Applied
+                        <span className="inline-flex items-center gap-0.5 text-[10px] md:text-xs text-green-600 font-semibold">
+                          <CheckCircle className="w-2.5 h-2.5 md:w-3 md:h-3" /> Applied
                         </span>
                       )}
                     </div>
