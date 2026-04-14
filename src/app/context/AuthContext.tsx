@@ -167,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/campaign` },
+      options: { redirectTo: `${window.location.origin}/login?mode=google-profile` },
     });
     if (error) throw new Error(error.message);
   };
@@ -175,7 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginWithFacebook = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "facebook",
-      options: { redirectTo: `${window.location.origin}/campaign` },
+      options: { redirectTo: `${window.location.origin}/login?mode=google-profile` },
     });
     if (error) throw new Error(error.message);
   };
