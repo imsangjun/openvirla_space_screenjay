@@ -257,9 +257,7 @@ export function Campaign() {
                         <span className="inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-[#004DF6] text-white shadow-lg">{offer.type}</span>
                       </div>
                       {offer.featured && (
-                        <div className="absolute bottom-1.5 md:bottom-2 left-1.5 md:left-2">
-                          <span className="inline-flex items-center gap-0.5 px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-semibold bg-[#004DF6]/80 backdrop-blur-md text-white shadow-lg">⚡</span>
-                        </div>
+
                       )}
                     </div>
                     <div className="p-2 md:p-3">
@@ -309,7 +307,7 @@ export function Campaign() {
                     <Clock className="w-4 h-4" />
                     <span className="font-medium">{selectedCampaign.daysLeft} {selectedCampaign.daysLeft === 1 ? "day" : "days"} left</span>
                   </div>
-                  {selectedCampaign.featured && <span className="px-3 py-1 rounded-lg text-sm font-semibold bg-[#004DF6] text-white">⚡ Featured & Urgent</span>}
+                  
                   {user && isApplied(user.id, selectedCampaign.id) && (
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-semibold bg-green-100 text-green-700">
                       <CheckCircle className="w-4 h-4" /> Already Applied
