@@ -237,9 +237,9 @@ export function Home() {
         {/* Main Content */}
         <div className="relative z-10 w-full px-4 sm:px-8 lg:px-16 pt-5" style={{maxWidth: '1400px', margin: '0 auto'}}>
           {/* Mobile Layout */}
-          <div className="md:hidden flex flex-row items-start justify-between gap-2">
-            {/* Headlines - 왼쪽 정렬 */}
-            <div className="font-black text-[10vw] sm:text-4xl leading-[1.1] tracking-[-0.02em] flex-shrink-0">
+          <div className="md:hidden flex flex-row items-start justify-between gap-2 w-full overflow-hidden">
+            {/* Headlines - 왼쪽 */}
+            <div className="font-black text-[9vw] leading-[1.1] tracking-[-0.02em]" style={{flexShrink: 0, maxWidth: '62%'}}>
               <div className="flex items-baseline justify-start gap-1 mb-1">
                 <span className="inline-block text-gray-900 font-bold">Create</span>
                 <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Content.</span>
@@ -253,9 +253,9 @@ export function Home() {
                 <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
               </div>
             </div>
-            {/* OPENSPACE IS 문구 - 오른쪽, 헤드라인 높이에 맞춤 */}
-            <div className="text-right flex-shrink-0">
-              <div className="font-black text-[3.2vw] leading-[1.35] tracking-[-0.01em] uppercase">
+            {/* OPENSPACE IS 문구 - 오른쪽 */}
+            <div className="text-right" style={{flexShrink: 0, maxWidth: '35%'}}>
+              <div className="font-black text-[2.8vw] leading-[1.4] tracking-[-0.01em] uppercase">
                 <div className="text-gray-900">OPENSPACE IS A</div>
                 <div className="text-gray-900">PLATFORM</div>
                 <div className="text-gray-900">CONNECTING</div>
