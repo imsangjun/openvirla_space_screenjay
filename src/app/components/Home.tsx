@@ -239,12 +239,12 @@ export function Home() {
           <div className="flex justify-between items-start gap-8 pt-8">
             {/* Left Side - Headlines + Description */}
             <div className="flex-shrink-0">
-              <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-[1.3] tracking-[-0.02em]">
-                <div className="flex items-baseline gap-1">
+              <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-[1.1] tracking-[-0.02em]">
+                <div className="flex items-baseline gap-1 mb-1">
                   <span className="inline-block text-gray-900 font-bold">Create</span>
                   <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Content.</span>
                 </div>
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1 mb-1">
                   <span className="inline-block text-gray-900 font-bold">Earn</span>
                   <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Money.</span>
                 </div>
