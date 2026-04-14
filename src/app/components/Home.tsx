@@ -103,7 +103,7 @@ export function Home() {
   const CARD_W = 280;
   const GAP = 16;
   const ITEM_W = CARD_W + GAP;
-  const SPEED = 0.06; // px per ms - 이 값을 조정하면 속도 변경
+  const SPEED = 0.03; // px per ms - 이 값을 조정하면 속도 변경
 
   // 에러 핸들러
   const handleVideoError = useCallback((index: number) => {
@@ -239,7 +239,7 @@ export function Home() {
           <div className="flex justify-between items-start gap-8 pt-8">
             {/* Left Side - Headlines + Description */}
             <div className="flex-shrink-0">
-              <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-tight tracking-[-0.02em] divide-y-2 divide-black">
+              <div className="font-black text-4xl md:text-6xl lg:text-7xl leading-tight tracking-[-0.02em]">
                 <div className="flex items-baseline gap-1">
                   <span className="inline-block text-gray-900 py-2 font-bold">Create</span>
                   <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Content.</span>
@@ -248,7 +248,7 @@ export function Home() {
                   <span className="inline-block text-gray-900 py-2 font-bold">Earn</span>
                   <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Money.</span>
                 </div>
-                <div className="flex items-baseline gap-1 border-b-2 border-black">
+                <div className="flex items-baseline gap-1">
                   <span className="inline-block text-gray-900 py-2 font-bold">Go</span>
                   <span className="inline-block bg-[#004DF6] text-white px-1.5 font-semibold whitespace-nowrap">Viral.</span>
                 </div>
