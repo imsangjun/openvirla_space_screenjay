@@ -116,16 +116,19 @@ export function Home() {
   }, []);
 
   useEffect(() => {
-    supabase.from("showcase_videos")
-      .select("url, sort_order")
-      .order("sort_order", { ascending: true })
-      .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
-          setVideoUrls(data.map((d) => d.url));
-        }
-        setVideoLoading(false);
-      })
-      .catch(() => setVideoLoading(false));
+    // auth 초기화 후 쿼리 (RLS 대응)
+    supabase.auth.getSession().then(() => {
+      supabase.from("showcase_videos")
+        .select("url, sort_order")
+        .order("sort_order", { ascending: true })
+        .then(({ data, error }) => {
+          if (!error && data && data.length > 0) {
+            setVideoUrls(data.map((d) => d.url));
+          }
+          setVideoLoading(false);
+        })
+        .catch(() => setVideoLoading(false));
+    });
   }, []);
 
   // 최적화된 애니메이션 루프
@@ -257,7 +260,7 @@ export function Home() {
               </div>
               {/* OPENSPACE IS - Go Viral 아래, 오른쪽 끝 정렬 */}
               <div className="text-right mt-1" style={{maxWidth: '320px', marginLeft: 'auto', marginRight: 0}}>
-                <div className="font-black text-[5vw] leading-[1.4] tracking-[-0.01em] uppercase">
+                <div className="font-black text-[3vw] leading-[1.4] tracking-[-0.01em] uppercase">
                   <div className="text-gray-900">OPENSPACE IS A</div>
                   <div className="text-gray-900">PLATFORM</div>
                   <div className="text-gray-900">CONNECTING</div>
