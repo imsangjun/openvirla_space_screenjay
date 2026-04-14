@@ -32,7 +32,7 @@ const Spinner = () => (
 );
 
 // ── 타입 ──────────────────────────────────────────────────────────────
-type Mode = "login" | "signup" | "forgot" | "verify";
+type Mode = "login" | "signup" | "forgot" | "verify" | "google-profile";
 
 export function Login() {
   const navigate    = useNavigate();
@@ -74,9 +74,19 @@ export function Login() {
 
   // ── 초기화 ────────────────────────────────────────────────────────
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, []);
-  useEffect(() => { if (user) navigate("/campaign"); }, [user, navigate]);
   useEffect(() => {
-    if (searchParams.get("mode") === "signup") setMode("signup");
+    if (!user) return;
+    if (mode === "google-profile") {
+      // 이미 프로필 작성한 유저면 바로 campaign으로
+      if (user.profile?.equipment) navigate("/campaign");
+    } else {
+      navigate("/campaign");
+    }
+  }, [user, navigate, mode]);
+  useEffect(() => {
+    const m = searchParams.get("mode");
+    if (m === "signup") setMode("signup");
+    if (m === "google-profile") setMode("google-profile");
   }, [searchParams]);
 
   const reset = () => { setError(""); setSuccess(""); };
@@ -197,6 +207,44 @@ export function Login() {
     try { await loginWithGoogle(); }
     catch { setError("Google 로그인에 실패했습니다."); }
     finally { setGoogleLoading(false); }
+  };
+
+  // ── 핸들러: Google 프로필 입력 완료 ──────────────────────────────
+  const handleGoogleProfile = async (e: React.FormEvent) => {
+    e.preventDefault(); reset();
+    if (contentSpecialties.length === 0) { setError("Content Specialty를 하나 이상 선택해주세요."); return; }
+    if (strongestPoints.length === 0) { setError("Strongest Point를 하나 이상 선택해주세요."); return; }
+    setSubmitting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setError("세션이 만료되었습니다. 다시 시도해주세요."); return; }
+      const userId = session.user.id;
+      const { error: upsertErr } = await supabase.from("profiles").upsert({
+        id:                    userId,
+        full_name:             signupData.fullName,
+        phone_number:          signupData.phoneNumber,
+        telegram_id:           signupData.telegramId,
+        birth_year:            signupData.birthYear,
+        nationality:           signupData.nationality,
+        country_location:      signupData.countryLocation,
+        instagram_link:        signupData.instagramLink,
+        tiktok_link:           signupData.tiktokLink,
+        youtube_link:          signupData.youtubeLink,
+        other_platform_link:   signupData.otherPlatformLink,
+        content_specialties:   contentSpecialties,
+        content_specialty_etc: signupData.contentSpecialtyEtc,
+        strongest_points:      strongestPoints,
+        strongest_point_etc:   signupData.strongestPointEtc,
+        shoot_formats:         shootFormats,
+        equipment:             signupData.equipment,
+      });
+      if (upsertErr) throw new Error(upsertErr.message);
+      navigate("/campaign");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "프로필 저장에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const toggleShootFormat = (fmt: string) => {
@@ -481,6 +529,153 @@ export function Login() {
                   <button onClick={() => { reset(); setMode("login"); }} className="text-[#004DF6] font-semibold hover:underline">Login</button>
                 </p>
               </div>
+            </>
+          )}
+
+          {/* ── GOOGLE PROFILE ── */}
+          {mode === "google-profile" && (
+            <>
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">Almost there!</h1>
+                <p className="text-gray-600 mt-2">Google 계정으로 가입을 완료하려면 아래 정보를 입력해주세요</p>
+              </div>
+              {renderFeedback()}
+              <form onSubmit={handleGoogleProfile} className="space-y-6">
+
+                {/* Personal Info */}
+                <div>
+                  <h3 className="text-sm font-bold text-[#004DF6] uppercase tracking-wide mb-4 pb-2 border-b border-gray-100">Personal Info</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className={labelCls}>Full Name *</label>
+                      <input type="text" value={signupData.fullName} onChange={e => setSignupData({...signupData, fullName: e.target.value})}
+                        required className={inputCls} placeholder="Your full name" />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Phone Number *</label>
+                      <input type="tel" value={signupData.phoneNumber} onChange={e => setSignupData({...signupData, phoneNumber: e.target.value})}
+                        required className={inputCls} placeholder="+82 10-0000-0000" />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Birth Year *</label>
+                      <input type="text" value={signupData.birthYear} onChange={e => setSignupData({...signupData, birthYear: e.target.value})}
+                        required className={inputCls} placeholder="e.g. 1995" maxLength={4} />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Telegram ID <span className="text-gray-400 font-normal">(optional)</span></label>
+                      <input type="text" value={signupData.telegramId} onChange={e => setSignupData({...signupData, telegramId: e.target.value})}
+                        className={inputCls} placeholder="@username" />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Nationality *</label>
+                      <select value={signupData.nationality} onChange={e => setSignupData({...signupData, nationality: e.target.value})}
+                        required className={inputCls}>
+                        <option value="">Select nationality</option>
+                        {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelCls}>Country of Residence *</label>
+                      <select value={signupData.countryLocation} onChange={e => setSignupData({...signupData, countryLocation: e.target.value})}
+                        required className={inputCls}>
+                        <option value="">Select country</option>
+                        {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelCls}>Instagram Link *</label>
+                      <input type="url" value={signupData.instagramLink} onChange={e => setSignupData({...signupData, instagramLink: e.target.value})}
+                        required className={inputCls} placeholder="https://instagram.com/..." />
+                    </div>
+                    <div>
+                      <label className={labelCls}>TikTok Link <span className="text-gray-400 font-normal">(optional)</span></label>
+                      <input type="url" value={signupData.tiktokLink} onChange={e => setSignupData({...signupData, tiktokLink: e.target.value})}
+                        className={inputCls} placeholder="https://tiktok.com/@..." />
+                    </div>
+                    <div>
+                      <label className={labelCls}>YouTube Link <span className="text-gray-400 font-normal">(optional)</span></label>
+                      <input type="url" value={signupData.youtubeLink} onChange={e => setSignupData({...signupData, youtubeLink: e.target.value})}
+                        className={inputCls} placeholder="https://youtube.com/@..." />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Other Platform <span className="text-gray-400 font-normal">(optional)</span></label>
+                      <input type="url" value={signupData.otherPlatformLink} onChange={e => setSignupData({...signupData, otherPlatformLink: e.target.value})}
+                        className={inputCls} placeholder="https://..." />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Creator Profile */}
+                <div>
+                  <h3 className="text-sm font-bold text-[#004DF6] uppercase tracking-wide mb-4 pb-2 border-b border-gray-100">Creator Profile</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className={labelCls}>Q1. Content Specialty * <span className="text-gray-400 font-normal">(복수 선택 가능)</span></label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {CONTENT_SPECIALTIES.map(opt => (
+                          <button key={opt} type="button" onClick={() => toggleContentSpecialty(opt)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                              contentSpecialties.includes(opt)
+                                ? "bg-[#004DF6] text-white border-[#004DF6]"
+                                : "bg-white text-gray-700 border-gray-300 hover:border-[#004DF6]"
+                            }`}>
+                            {contentSpecialties.includes(opt) && <Check className="w-3.5 h-3.5" />}
+                            {opt === "etc" ? "Other" : opt}
+                          </button>
+                        ))}
+                      </div>
+                      {contentSpecialties.includes("etc") && (
+                        <input type="text" value={signupData.contentSpecialtyEtc}
+                          onChange={e => setSignupData({...signupData, contentSpecialtyEtc: e.target.value})}
+                          className={`${inputCls} mt-2`} placeholder="Please specify" />
+                      )}
+                    </div>
+                    <div>
+                      <label className={labelCls}>Q2. Strongest Point * <span className="text-gray-400 font-normal">(복수 선택 가능)</span></label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {STRONGEST_POINTS.map(opt => (
+                          <button key={opt} type="button" onClick={() => toggleStrongestPoint(opt)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                              strongestPoints.includes(opt)
+                                ? "bg-[#004DF6] text-white border-[#004DF6]"
+                                : "bg-white text-gray-700 border-gray-300 hover:border-[#004DF6]"
+                            }`}>
+                            {strongestPoints.includes(opt) && <Check className="w-3.5 h-3.5" />}
+                            {opt === "etc" ? "Other" : opt}
+                          </button>
+                        ))}
+                      </div>
+                      {strongestPoints.includes("etc") && (
+                        <input type="text" value={signupData.strongestPointEtc}
+                          onChange={e => setSignupData({...signupData, strongestPointEtc: e.target.value})}
+                          className={`${inputCls} mt-2`} placeholder="Please specify" />
+                      )}
+                    </div>
+                    <div>
+                      <label className={labelCls}>Q3. Shoot Formats *</label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {SHOOT_FORMATS.map(fmt => (
+                          <button key={fmt} type="button" onClick={() => toggleShootFormat(fmt)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
+                              shootFormats.includes(fmt)
+                                ? "bg-[#004DF6] text-white border-[#004DF6]"
+                                : "bg-white text-gray-700 border-gray-300 hover:border-[#004DF6]"
+                            }`}>{fmt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className={labelCls}>Q4. Equipment *</label>
+                      <input type="text" value={signupData.equipment}
+                        onChange={e => setSignupData({...signupData, equipment: e.target.value})}
+                        required className={inputCls} placeholder="e.g. iPhone 15 Pro, Sony A7III" />
+                    </div>
+                  </div>
+                </div>
+
+                {submitBtn("Complete Sign Up", submitting)}
+              </form>
             </>
           )}
 
