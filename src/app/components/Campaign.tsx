@@ -94,7 +94,7 @@ export function Campaign() {
     }
   };
 
-  const categories = ["All", "Product", "Offline"];
+  const categories = ["All", "Product", "Place"];
   const platforms = ["All", "Instagram", "TikTok", "YouTube"];
 
   const filteredCampaigns = campaigns.filter((o) => {
@@ -191,17 +191,21 @@ export function Campaign() {
 
               {/* Filters - Mobile Compact */}
               <div className="space-y-2 md:space-y-4 mb-4 md:mb-6">
-                {/* Mobile: Horizontal scroll filters */}
+                {/* Mobile: Separate rows for Category and Platform */}
                 <div className="md:hidden space-y-2">
+                  {/* Category row */}
                   <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                     {categories.map((c) => (
                       <button key={c} onClick={() => setSelectedCategory(c)} className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${selectedCategory === c ? "bg-[#004DF6] text-white" : "bg-gray-100 text-gray-700"}`}>{c}</button>
                     ))}
-                    <span className="w-px bg-gray-300 mx-1" />
+                  </div>
+                  {/* Platform row */}
+                  <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                     {platforms.map((p) => (
                       <button key={p} onClick={() => setSelectedPlatform(p)} className={`flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${selectedPlatform === p ? "bg-[#004DF6] text-white" : "bg-gray-100 text-gray-700"}`}>{p}</button>
                     ))}
                   </div>
+                  {/* Search */}
                   <input type="text" placeholder="Search..."
                     value={searchKeyword} onChange={(e) => setSearchKeyword(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-[#004DF6]" />
