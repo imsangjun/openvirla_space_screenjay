@@ -3,14 +3,26 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { User, LogOut, ChevronDown, Menu, X } from "lucide-react";
 const logo = "/openviral_logo.png";
 import { useAuth } from "../context/AuthContext";
+import { ReconsentModal } from "./ReconsentModal";
 
 export function Root() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, needsTermsReconsent, needsPrivacyReconsent, acceptPolicies } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 재동의 모달 표시 여부: 로그인 + 버전 불일치 + 정책 페이지가 아닐 때만
+  const isPolicyPage =
+    location.pathname === "/terms" ||
+    location.pathname === "/privacy" ||
+    location.pathname === "/login";
+  const showReconsent =
+    !!user &&
+    !!user.profile &&
+    (needsTermsReconsent || needsPrivacyReconsent) &&
+    !isPolicyPage;
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -219,6 +231,24 @@ export function Root() {
       {/* Page Content */}
       <Outlet />
 
+      {/* 정책 변경 시 재동의 모달 */}
+      {showReconsent && (
+        <ReconsentModal
+          needsTerms={needsTermsReconsent}
+          needsPrivacy={needsPrivacyReconsent}
+          onAgree={async () => {
+            await acceptPolicies({
+              terms: needsTermsReconsent,
+              privacy: needsPrivacyReconsent,
+            });
+          }}
+          onLogout={async () => {
+            await logout();
+            navigate("/");
+          }}
+        />
+      )}
+
       {/* Footer */}
       <Footer />
     </div>
@@ -226,8 +256,6 @@ export function Root() {
 }
 
 function Footer() {
-  const [modal, setModal] = useState<"terms" | "privacy" | null>(null);
-
   return (
     <>
       <footer className="bg-gray-50 border-t border-gray-200 mt-20">
@@ -244,50 +272,24 @@ function Footer() {
           </div>
           <div className="mt-5 pt-5 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-              <button
-                onClick={() => setModal("terms")}
+              <Link
+                to="/terms"
                 className="text-xs text-gray-500 hover:text-gray-800 underline text-left"
               >
                 이용약관
-              </button>
+              </Link>
               <span className="hidden sm:inline text-gray-300 text-xs">/</span>
-              <button
-                onClick={() => setModal("privacy")}
+              <Link
+                to="/privacy"
                 className="text-xs text-gray-500 hover:text-gray-800 underline text-left"
               >
                 개인정보처리방침
-              </button>
+              </Link>
             </div>
             <span className="sm:ml-auto text-xs text-gray-400">© 2026 OpenSpace. All rights reserved.</span>
           </div>
         </div>
       </footer>
-
-      {/* 팝업 모달 */}
-      {modal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          onClick={() => setModal(null)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md mx-4 relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-lg font-bold text-gray-900 mb-4">
-              {modal === "terms" ? "이용약관" : "개인정보처리방침"}
-            </h2>
-            <div className="text-sm text-gray-700 leading-relaxed min-h-[80px]">
-              안녕하세요
-            </div>
-            <button
-              onClick={() => setModal(null)}
-              className="mt-6 w-full py-2.5 bg-[#004DF6] text-white text-sm font-semibold rounded-xl hover:bg-[#0041cc] transition-all"
-            >
-              닫기
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
