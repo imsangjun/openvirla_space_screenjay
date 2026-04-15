@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
+import { TERMS_VERSION, PRIVACY_VERSION } from "../lib/policyVersions";
 import { Check } from "lucide-react";
 
 // ── 상수 ──────────────────────────────────────────────────────────────
@@ -62,6 +63,9 @@ export function Login() {
   const [shootFormats, setShootFormats] = useState<string[]>([]);
   const [contentSpecialties, setContentSpecialties] = useState<string[]>([]);
   const [strongestPoints, setStrongestPoints] = useState<string[]>([]);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToPrivacy, setAgreedToPrivacy] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   // ── Forgot password fields ──
   const [forgotEmail, setForgotEmail] = useState("");
@@ -121,6 +125,12 @@ export function Login() {
     if (strongestPoints.length === 0) {
       setError("Strongest Point를 하나 이상 선택해주세요."); return;
     }
+    if (!agreedToTerms) {
+      setError("이용약관에 동의해주세요."); return;
+    }
+    if (!agreedToPrivacy) {
+      setError("개인정보처리방침에 동의해주세요."); return;
+    }
 
     const profile = {
       fullName:             signupData.fullName,
@@ -143,7 +153,11 @@ export function Login() {
 
     try {
       setSubmitting(true);
-      await signupWithEmail(signupData.username, signupData.email, signupData.password, profile);
+      await signupWithEmail(signupData.username, signupData.email, signupData.password, profile, {
+        termsAccepted: agreedToTerms,
+        privacyAccepted: agreedToPrivacy,
+        marketingOptIn,
+      });
       setSuccess("가입이 완료됐습니다! 이메일을 확인해 인증 후 로그인해주세요.");
       setMode("login");
     } catch (err: unknown) {
@@ -214,6 +228,8 @@ export function Login() {
     e.preventDefault(); reset();
     if (contentSpecialties.length === 0) { setError("Content Specialty를 하나 이상 선택해주세요."); return; }
     if (strongestPoints.length === 0) { setError("Strongest Point를 하나 이상 선택해주세요."); return; }
+    if (!agreedToTerms) { setError("이용약관에 동의해주세요."); return; }
+    if (!agreedToPrivacy) { setError("개인정보처리방침에 동의해주세요."); return; }
     setSubmitting(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -237,6 +253,11 @@ export function Login() {
         strongest_point_etc:   signupData.strongestPointEtc,
         shoot_formats:         shootFormats,
         equipment:             signupData.equipment,
+        agreed_to_terms_at:        new Date().toISOString(),
+        agreed_to_terms_version:   TERMS_VERSION,
+        agreed_to_privacy_at:      new Date().toISOString(),
+        agreed_to_privacy_version: PRIVACY_VERSION,
+        marketing_opt_in_at:       marketingOptIn ? new Date().toISOString() : null,
       });
       if (upsertErr) throw new Error(upsertErr.message);
       navigate("/campaign");
@@ -521,6 +542,53 @@ export function Login() {
                   </div>
                 </div>
 
+                {/* Consents */}
+                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#004DF6] focus:ring-[#004DF6] cursor-pointer flex-shrink-0"
+                    />
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      <span className="text-red-500 font-semibold">[Required]</span> I have read and agree to the{" "}
+                      <Link to="/terms" target="_blank" className="text-[#004DF6] font-semibold hover:underline">
+                        Terms of Service
+                      </Link>
+                      .
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreedToPrivacy}
+                      onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#004DF6] focus:ring-[#004DF6] cursor-pointer flex-shrink-0"
+                    />
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      <span className="text-red-500 font-semibold">[Required]</span> I have read and agree to the{" "}
+                      <Link to="/privacy" target="_blank" className="text-[#004DF6] font-semibold hover:underline">
+                        Privacy Policy
+                      </Link>
+                      .
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={marketingOptIn}
+                      onChange={(e) => setMarketingOptIn(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#004DF6] focus:ring-[#004DF6] cursor-pointer flex-shrink-0"
+                    />
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      <span className="text-gray-500 font-semibold">[Optional]</span> I want to receive marketing emails about new campaigns, brand collaborations, and platform updates. You can unsubscribe at any time.
+                    </span>
+                  </label>
+                </div>
+
                 {submitBtn("Create Account", submitting)}
               </form>
 
@@ -672,6 +740,53 @@ export function Login() {
                         required className={inputCls} placeholder="e.g. iPhone 15 Pro, Sony A7III" />
                     </div>
                   </div>
+                </div>
+
+                {/* Consents */}
+                <div className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#004DF6] focus:ring-[#004DF6] cursor-pointer flex-shrink-0"
+                    />
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      <span className="text-red-500 font-semibold">[Required]</span> I have read and agree to the{" "}
+                      <Link to="/terms" target="_blank" className="text-[#004DF6] font-semibold hover:underline">
+                        Terms of Service
+                      </Link>
+                      .
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={agreedToPrivacy}
+                      onChange={(e) => setAgreedToPrivacy(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#004DF6] focus:ring-[#004DF6] cursor-pointer flex-shrink-0"
+                    />
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      <span className="text-red-500 font-semibold">[Required]</span> I have read and agree to the{" "}
+                      <Link to="/privacy" target="_blank" className="text-[#004DF6] font-semibold hover:underline">
+                        Privacy Policy
+                      </Link>
+                      .
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={marketingOptIn}
+                      onChange={(e) => setMarketingOptIn(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-gray-300 text-[#004DF6] focus:ring-[#004DF6] cursor-pointer flex-shrink-0"
+                    />
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      <span className="text-gray-500 font-semibold">[Optional]</span> I want to receive marketing emails about new campaigns, brand collaborations, and platform updates. You can unsubscribe at any time.
+                    </span>
+                  </label>
                 </div>
 
                 {submitBtn("Complete Sign Up", submitting)}
