@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "../lib/supabaseClient";
 import type { Session } from "@supabase/supabase-js";
+import { TERMS_VERSION, PRIVACY_VERSION } from "../lib/policyVersions";
 
 export interface UserProfile {
   fullName: string;
@@ -19,6 +20,12 @@ export interface UserProfile {
   strongestPointEtc: string;
   shootFormats: string[];
   equipment: string;
+  // 동의 메타데이터 (옵션 - 기존 row와의 호환성을 위해 nullable)
+  agreedToTermsAt?: string | null;
+  agreedToTermsVersion?: string | null;
+  agreedToPrivacyAt?: string | null;
+  agreedToPrivacyVersion?: string | null;
+  marketingOptInAt?: string | null;
 }
 
 export interface User {
@@ -34,7 +41,13 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   loginWithEmail: (email: string, password: string) => Promise<void>;
-  signupWithEmail: (username: string, email: string, password: string, profile?: UserProfile) => Promise<void>;
+  signupWithEmail: (
+    username: string,
+    email: string,
+    password: string,
+    profile: UserProfile | undefined,
+    consents: { termsAccepted: boolean; privacyAccepted: boolean; marketingOptIn: boolean }
+  ) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   loginWithFacebook: () => Promise<void>;
   logout: () => Promise<void>;
@@ -42,6 +55,10 @@ interface AuthContextType {
   updateAvatar: (avatar: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  acceptPolicies: (which: { terms: boolean; privacy: boolean }) => Promise<void>;
+  updateMarketingOptIn: (optIn: boolean) => Promise<void>;
+  needsTermsReconsent: boolean;
+  needsPrivacyReconsent: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -65,6 +82,11 @@ function rowToProfile(row: Record<string, unknown>): UserProfile {
     strongestPointEtc:   (row.strongest_point_etc as string)   ?? "",
     shootFormats:        (row.shoot_formats as string[])        ?? [],
     equipment:           (row.equipment as string)             ?? "",
+    agreedToTermsAt:        (row.agreed_to_terms_at as string)        ?? null,
+    agreedToTermsVersion:   (row.agreed_to_terms_version as string)   ?? null,
+    agreedToPrivacyAt:      (row.agreed_to_privacy_at as string)      ?? null,
+    agreedToPrivacyVersion: (row.agreed_to_privacy_version as string) ?? null,
+    marketingOptInAt:       (row.marketing_opt_in_at as string)       ?? null,
   };
 }
 
@@ -130,7 +152,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw new Error(error.message);
   };
 
-  const signupWithEmail = async (username: string, email: string, password: string, profile?: UserProfile) => {
+  const signupWithEmail = async (
+    username: string,
+    email: string,
+    password: string,
+    profile: UserProfile | undefined,
+    consents: { termsAccepted: boolean; privacyAccepted: boolean; marketingOptIn: boolean }
+  ) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -140,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // profiles 행 생성/업데이트 (트리거로 기본 row는 이미 생성됨)
     if (profile && data.user) {
+      const now = new Date().toISOString();
       const { error: upsertErr } = await supabase.from("profiles").upsert({
         id: data.user.id,
         username,
@@ -159,6 +188,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         strongest_point_etc:  profile.strongestPointEtc,
         shoot_formats:        profile.shootFormats,
         equipment:            profile.equipment,
+        agreed_to_terms_at:        consents.termsAccepted   ? now : null,
+        agreed_to_terms_version:   consents.termsAccepted   ? TERMS_VERSION   : null,
+        agreed_to_privacy_at:      consents.privacyAccepted ? now : null,
+        agreed_to_privacy_version: consents.privacyAccepted ? PRIVACY_VERSION : null,
+        marketing_opt_in_at:       consents.marketingOptIn  ? now : null,
       });
       if (upsertErr) console.error("Profile upsert error:", upsertErr);
     }
@@ -224,11 +258,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const acceptPolicies = async (which: { terms: boolean; privacy: boolean }) => {
+    if (!user) return;
+    const now = new Date().toISOString();
+    const patch: Record<string, string> = { id: user.id };
+    if (which.terms) {
+      patch.agreed_to_terms_at = now;
+      patch.agreed_to_terms_version = TERMS_VERSION;
+    }
+    if (which.privacy) {
+      patch.agreed_to_privacy_at = now;
+      patch.agreed_to_privacy_version = PRIVACY_VERSION;
+    }
+    const { error } = await supabase.from("profiles").upsert(patch);
+    if (error) throw new Error(error.message);
+    await refreshProfile();
+  };
+
+  const updateMarketingOptIn = async (optIn: boolean) => {
+    if (!user) return;
+    const { error } = await supabase.from("profiles").upsert({
+      id: user.id,
+      marketing_opt_in_at: optIn ? new Date().toISOString() : null,
+    });
+    if (error) throw new Error(error.message);
+    await refreshProfile();
+  };
+
+  // 정책 버전 비교: 동의 기록이 없거나 현재 버전과 다르면 재동의 필요
+  const needsTermsReconsent =
+    !!user && user.profile != null && user.profile.agreedToTermsVersion !== TERMS_VERSION;
+  const needsPrivacyReconsent =
+    !!user && user.profile != null && user.profile.agreedToPrivacyVersion !== PRIVACY_VERSION;
+
   return (
     <AuthContext.Provider value={{
       user, isLoading,
       loginWithEmail, signupWithEmail, loginWithGoogle, loginWithFacebook,
       logout, updateProfile, updateAvatar, deleteAccount, refreshProfile,
+      acceptPolicies, updateMarketingOptIn,
+      needsTermsReconsent, needsPrivacyReconsent,
     }}>
       {children}
     </AuthContext.Provider>
