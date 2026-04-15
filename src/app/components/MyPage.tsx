@@ -5,7 +5,7 @@ import { useCampaigns, CampaignOffer } from "../context/CampaignContext";
 import {
   Camera, User, Phone, Mail, MessageCircle, Calendar,
   Globe, Instagram, Youtube, Link, LogOut, Trash2,
-  Save, ChevronRight, AlertTriangle, Check, Clock, Sparkles,
+  Save, ChevronRight, AlertTriangle, Check, Clock, Sparkles, Bell,
 } from "lucide-react";
 
 const TikTokIcon = () => (
@@ -39,11 +39,11 @@ const emptyProfile = (): UserProfile => ({
   shootFormats: [], equipment: "",
 });
 
-type Section = "profile-photo" | "personal-info" | "creator-profile" | "campaigns" | "logout" | "delete";
+type Section = "profile-photo" | "personal-info" | "creator-profile" | "campaigns" | "notifications" | "logout" | "delete";
 
 export function MyPage() {
   const navigate = useNavigate();
-  const { user, logout, updateProfile, updateAvatar, deleteAccount, refreshProfile } = useAuth();
+  const { user, logout, updateProfile, updateAvatar, deleteAccount, refreshProfile, updateMarketingOptIn } = useAuth();
   const { getAppliedCampaigns, cancelCampaign, refreshApplied } = useCampaigns();
   const [searchParams] = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -150,6 +150,7 @@ export function MyPage() {
     { id: "personal-info", label: "Personal Info", icon: <User className="w-4 h-4" /> },
     { id: "creator-profile", label: "Creator Profile", icon: <Sparkles className="w-4 h-4" /> },
     { id: "campaigns", label: "Active Campaigns", icon: <Clock className="w-4 h-4" /> },
+    { id: "notifications", label: "Notifications", icon: <Bell className="w-4 h-4" /> },
     { id: "logout", label: "Log Out", icon: <LogOut className="w-4 h-4" />, danger: false },
     { id: "delete", label: "Delete Account", icon: <Trash2 className="w-4 h-4" />, danger: true },
   ];
@@ -609,6 +610,14 @@ export function MyPage() {
               </div>
             )}
 
+            {/* ── Notifications ── */}
+            {activeSection === "notifications" && (
+              <NotificationsSection
+                marketingOptIn={!!user.profile?.marketingOptInAt}
+                onUpdate={updateMarketingOptIn}
+              />
+            )}
+
             {/* ── Log Out ── */}
             {activeSection === "logout" && (
               <div className="bg-white rounded-xl md:rounded-2xl border border-gray-100 shadow-sm p-5 md:p-8">
@@ -711,6 +720,65 @@ function Field({ icon, label, children, fullWidth, required }: { icon: React.Rea
         {icon} {label}{required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
+    </div>
+  );
+}
+
+function NotificationsSection({ marketingOptIn, onUpdate }: { marketingOptIn: boolean; onUpdate: (optIn: boolean) => Promise<void> }) {
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+
+  const handleToggle = async (next: boolean) => {
+    setSaving(true);
+    try {
+      await onUpdate(next);
+      setSavedAt(Date.now());
+      setTimeout(() => setSavedAt(null), 2500);
+    } catch (e) {
+      console.error("Failed to update marketing opt-in:", e);
+      alert("저장에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl md:rounded-2xl border border-gray-100 shadow-sm p-5 md:p-8">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-blue-50 flex items-center justify-center">
+          <Bell className="w-4 h-4 md:w-5 md:h-5 text-[#004DF6]" />
+        </div>
+        <h2 className="text-lg md:text-xl font-bold text-gray-900">Notifications</h2>
+      </div>
+      <p className="text-gray-500 text-xs md:text-sm mb-6 leading-relaxed">
+        Manage how OpenViral Space communicates with you.
+      </p>
+
+      <div className="border border-gray-200 rounded-xl p-4 md:p-5 flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="font-semibold text-gray-900 text-sm md:text-base">Marketing Emails</p>
+          <p className="text-xs md:text-sm text-gray-500 mt-1 leading-relaxed">
+            Receive emails about new campaigns, brand collaborations, and platform updates.
+            Transactional emails (campaign confirmations, password resets) are always sent.
+          </p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={marketingOptIn}
+          disabled={saving}
+          onClick={() => handleToggle(!marketingOptIn)}
+          className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${marketingOptIn ? "bg-[#004DF6]" : "bg-gray-300"} ${saving ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+        >
+          <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${marketingOptIn ? "translate-x-5" : "translate-x-0.5"}`} />
+        </button>
+      </div>
+
+      {savedAt && (
+        <div className="mt-4 flex items-center gap-2 text-sm text-green-600">
+          <Check className="w-4 h-4" /> Saved
+        </div>
+      )}
     </div>
   );
 }
