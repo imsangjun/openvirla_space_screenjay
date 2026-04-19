@@ -80,22 +80,42 @@ export function MyPage() {
   };
 
   const handleSaveProfile = async () => {
+  try {
     await updateProfile(form);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
-  };
+  } catch (err) {
+    console.error("Save profile error:", err);
+    alert(
+      err instanceof Error
+        ? err.message
+        : "저장에 실패했습니다. 다시 시도해주세요."
+    );
+  }
+};
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const result = ev.target?.result as string;
-      setAvatarPreview(result);
-      updateAvatar(result);
-    };
-    reader.readAsDataURL(file);
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const result = ev.target?.result as string;
+    setAvatarPreview(result);
+    try {
+      await updateAvatar(result);
+    } catch (err) {
+      console.error("Avatar update error:", err);
+      alert(
+        err instanceof Error
+          ? err.message
+          : "아바타 변경에 실패했습니다. 다시 시도해주세요."
+      );
+      // 실패 시 미리보기를 원래 값으로 복원
+      setAvatarPreview(user?.avatar ?? "");
+    }
   };
+  reader.readAsDataURL(file);
+};
 
   const handleLogout = async () => {
     await logout();
