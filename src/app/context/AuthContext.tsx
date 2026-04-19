@@ -116,29 +116,76 @@ async function fetchProfile(userId: string): Promise<{ profile: UserProfile | un
   return { profile: rowToProfile(data as Record<string, unknown>), avatar: (data as Record<string, unknown>).avatar_url as string | undefined };
 }
 
+// 유효한 세션을 보장 - 만료 임박/만료 시 자동 갱신
+// DB 호출 전에 항상 이 함수를 통해 세션 유효성을 확인한다.
+async function ensureValidSession(): Promise<Session | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return null;
+
+  // expires_at은 초 단위 Unix timestamp
+  const now = Math.floor(Date.now() / 1000);
+  const expiresAt = session.expires_at ?? 0;
+  const secondsLeft = expiresAt - now;
+
+  // 만료됐거나 60초 이내 만료 예정이면 강제 갱신
+  if (secondsLeft < 60) {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error || !data.session) {
+      return null;
+    }
+    return data.session;
+  }
+
+  return session;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
       if (session) {
         const { profile, avatar } = await fetchProfile(session.user.id);
+        if (!mounted) return;
         setUser(buildUser(session, profile, avatar));
       }
       setIsLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session) {
-        const { profile, avatar } = await fetchProfile(session.user.id);
-        setUser(buildUser(session, profile, avatar));
-      } else {
+    // ⚠️ onAuthStateChange 콜백 안에서 직접 await로 Supabase를 호출하면
+    // 내부 Lock과 충돌해 deadlock이 생길 수 있다.
+    // setTimeout(..., 0) 으로 다음 tick에 실행시켜 분리한다. (공식 권장 패턴)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+
+      if (!session) {
         setUser(null);
+        return;
       }
+
+      // 세션 정보만 먼저 반영 (프로필 없이도 user는 바로 세팅)
+      setUser((prev) => prev ?? buildUser(session));
+
+      setTimeout(async () => {
+        if (!mounted) return;
+        try {
+          const { profile, avatar } = await fetchProfile(session.user.id);
+          if (!mounted) return;
+          setUser(buildUser(session, profile, avatar));
+        } catch (e) {
+          console.error("fetchProfile failed in onAuthStateChange:", e);
+        }
+      }, 0);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const refreshProfile = async () => {
@@ -221,6 +268,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (profile: UserProfile) => {
     if (!user) return;
+
+    // DB 요청 전에 세션 유효성 보장 (만료/갱신 문제 방지)
+    const session = await ensureValidSession();
+    if (!session) {
+      throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+    }
+
     const { error } = await supabase.from("profiles").upsert({
       id: user.id,
       full_name:            profile.fullName,
@@ -246,6 +300,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateAvatar = async (avatarUrl: string) => {
     if (!user) return;
+
+    const session = await ensureValidSession();
+    if (!session) {
+      throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+    }
+
     const { error } = await supabase.from("profiles").upsert({ id: user.id, avatar_url: avatarUrl });
     if (error) throw new Error(error.message);
     setUser((prev) => prev ? { ...prev, avatar: avatarUrl } : prev);
@@ -260,6 +320,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const acceptPolicies = async (which: { terms: boolean; privacy: boolean }) => {
     if (!user) return;
+
+    const session = await ensureValidSession();
+    if (!session) {
+      throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+    }
+
     const now = new Date().toISOString();
     const patch: Record<string, string> = { id: user.id };
     if (which.terms) {
@@ -277,6 +343,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateMarketingOptIn = async (optIn: boolean) => {
     if (!user) return;
+
+    const session = await ensureValidSession();
+    if (!session) {
+      throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+    }
+
     const { error } = await supabase.from("profiles").upsert({
       id: user.id,
       marketing_opt_in_at: optIn ? new Date().toISOString() : null,
